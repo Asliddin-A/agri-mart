@@ -1,1050 +1,749 @@
 <!DOCTYPE html>
-<html lang="uz" class="h-full bg-slate-50">
+<html lang="uz" class="bg-slate-50">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <!-- SEO sozlari -->
-  <title>AgriEko - Qishloq xo'jaligi loyihasi</title>
-  <meta name="description" content="AgriEko loyihasi haqida ma'lumotlar va xizmatlar.">
-  <meta name="keywords" content="AgriEko, Agri Eko, qishloq xo'jaligi, ekologiya">
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#14532d">
+
+    <!-- SEO -->
+    <title>AgriEko | Fermerdan to'g'ridan-to'g'ri xarid</title>
+    <meta name="description" content="AgriEko: restoran, do'kon va ulgurji bozorlar fermerdan vositachisiz sabzavot, meva va ko'katlarni xarid qiladigan B2B platforma.">
+    <meta name="keywords" content="AgriEko, Agri Eko, qishloq xo'jaligi, fermer, ulgurji, sabzavot, meva, B2B">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="AgriEko | Fermerdan to'g'ridan-to'g'ri xarid">
+    <meta property="og:description" content="Vositachisiz va shaffof narxlarda fermer mahsulotlari.">
+
     <link rel="icon" type="image/png" href="/favicon.png">
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons CDN -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         agri: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            200: '#bbf7d0',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                            900: '#14532d',
-                        },
-                        amber: {
-                            500: '#f59e0b',
+                            50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0',
+                            500: '#22c55e', 600: '#16a34a', 700: '#15803d',
+                            800: '#166534', 900: '#14532d', 950: '#052e16'
                         }
                     },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
                 }
             }
         }
     </script>
     <style>
-        html { scroll-behavior: smooth; }
+        html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+        body { overflow-x: clip; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .glass-header {
-            background: rgba(20, 83, 45, 0.95);
-            backdrop-filter: blur(10px);
+        .glass-header { background: rgba(20, 83, 45, 0.97); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        #marketplaceSection { scroll-margin-top: 8rem; }
+        .no-scrollbar { scrollbar-width: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        :focus-visible { outline: 2px solid #22c55e; outline-offset: 2px; }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
         }
     </style>
 </head>
-<body class="h-full font-sans text-slate-800 antialiased flex flex-col min-h-screen bg-slate-50">
+<body class="min-h-screen flex flex-col font-sans text-slate-800 antialiased bg-slate-50">
 
-  <!-- TO'G'RILANGAN VA JONLI YONMA-YON TUGMALAR BLOKI 👇 -->
-    <div class="p-4 bg-white shadow-sm flex justify-between items-center w-full">
-        <!-- Sayt logotipi yoki nomi -->
-        <span class="font-bold text-lg text-green-600">AgriEko</span>
-        
-        <!-- Tugmalar turadigan qism (Space-x-3 tugmalarni chiroyli ajratib turadi) -->
-        <div class="flex items-center space-x-3">
-            <!-- Xabarlar (Chat) tugmasi -->
-            <a href="chat.html" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-200 transition flex items-center">
-                <i class="fa-regular fa-comment-dots mr-2 text-green-600"></i> Xabarlar
+    <!-- Yuqori tezkor havolalar -->
+    <div class="bg-white border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-2 sm:justify-end">
+            <a href="chat.html" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-slate-100 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-slate-200 transition">
+                <i class="fa-regular fa-comment-dots text-agri-600"></i> Xabarlar
             </a>
-            
-            <!-- E'lon berish tugmasi -->
-            <a href="elon.html" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition flex items-center">
-                <i class="fa-solid fa-plus mr-1.5"></i> E'lon berish
+            <a href="elon.html" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-agri-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-agri-700 transition">
+                <i class="fa-solid fa-plus"></i> E'lon berish
             </a>
         </div>
     </div>
 
+    <!-- Asosiy sarlavha -->
     <header class="sticky top-0 z-30 glass-header text-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
-                <!-- Brand Logo & Tagline -->
-                <div class="flex items-center space-x-3 cursor-pointer" onclick="resetAllViews()">
-                    <div class="bg-agri-500 text-white p-2.5 rounded-2xl flex items-center justify-center shadow-lg shadow-agri-500/30">
-                        <i class="fa-solid fa-leaf text-2xl"></i>
-                    </div>
-                    <div>
-                        <span class="text-2xl font-extrabold tracking-tight text-white flex items-center gap-2">
-                            AgriEko <span class="text-xs bg-agri-600 text-agri-100 font-semibold px-2.5 py-0.5 rounded-full border border-agri-500/50">B2B Platforma</span>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-0">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-2.5 sm:h-20 sm:flex-nowrap">
+
+                <!-- Brend -->
+                <button id="brandBtn" type="button" class="order-1 mr-auto flex items-center gap-3 min-w-0 text-left" aria-label="Bosh sahifaga qaytish">
+                    <span class="shrink-0 bg-agri-500 text-white w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-agri-500/30">
+                        <i class="fa-solid fa-leaf text-xl sm:text-2xl"></i>
+                    </span>
+                    <span class="min-w-0">
+                        <span class="flex items-center gap-2 text-xl sm:text-2xl font-extrabold tracking-tight text-white">
+                            AgriEko
+                            <span class="hidden min-[400px]:inline-block text-[11px] bg-agri-600 text-agri-100 font-semibold px-2.5 py-0.5 rounded-full border border-agri-500/50 whitespace-nowrap">B2B Platforma</span>
                         </span>
-                        <p class="text-[11px] text-agri-200 hidden sm:block">Vositachisiz Qishloq Xo'jaligi va Eko-Texnologiya Baza</p>
-                    </div>
+                        <span class="hidden md:block text-[11px] text-agri-200">Vositachisiz qishloq xo'jaligi va eko-texnologiya bazasi</span>
+                    </span>
+                </button>
+
+                <!-- Tezkor e'lon (faqat katta ekranda) -->
+                <a id="quickAddProductBtn" href="/elon.html" class="hidden sm:flex sm:order-2 items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-900 transition shadow-md shadow-amber-500/20">
+                    <i class="fa-solid fa-circle-plus text-sm"></i>
+                    <span>Mahsulot joylashtirish</span>
+                </a>
+
+                <!-- Rol almashtirgich: telefonda alohida qatorda, to'liq kenglikda -->
+                <div class="order-3 w-full sm:w-auto grid grid-cols-2 sm:flex items-center gap-1 bg-agri-950 p-1 rounded-2xl border border-agri-800 shadow-inner">
+                    <button id="roleBuyerBtn" type="button" aria-pressed="true"></button>
+                    <button id="roleFarmerBtn" type="button" aria-pressed="false"></button>
                 </div>
 
-                <!-- Navigation Action Controls -->
-                <div class="flex items-center space-x-3 sm:space-x-5">
-                    <!-- Quick Add Listing Button (Visible to All) -->
-                    <button id="quickAddProductBtn" class="hidden sm:flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-900 transition shadow-md shadow-amber-500/20">
-                        <i class="fa-solid fa-plus-circle text-sm"></i>
-                        <span>Mahsulot Joylashtirish</span>
+                <!-- Savat -->
+                <div class="order-2 sm:order-4 relative">
+                    <button id="openCartBtn" type="button" aria-label="Savatni ochish" class="relative w-11 h-11 flex items-center justify-center text-agri-100 hover:text-white bg-agri-800/80 hover:bg-agri-800 rounded-xl transition border border-agri-700/50">
+                        <i class="fa-solid fa-cart-shopping text-lg"></i>
+                        <span id="cartCountBadge" class="absolute -top-1.5 -right-1.5 min-w-[1.25rem] text-center bg-amber-500 text-slate-950 text-[11px] font-extrabold px-1.5 py-0.5 rounded-full shadow hidden">0</span>
                     </button>
-
-                    <!-- Role Switcher Toggle -->
-                    <div class="bg-agri-950 p-1 rounded-2xl flex items-center border border-agri-800 shadow-inner">
-                        <button id="roleBuyerBtn" class="px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-white text-agri-900 shadow">
-                            <i class="fa-solid fa-utensils text-agri-600"></i>
-                            <span>Restoran / Do'kon</span>
-                        </button>
-                        <button id="roleFarmerBtn" class="px-3.5 py-2 rounded-xl text-xs font-bold text-agri-200 hover:text-white transition flex items-center gap-2">
-                            <i class="fa-solid fa-tractor"></i>
-                            <span>Fermer (Sotuvchi)</span>
-                        </button>
-                    </div>
-
-                    <!-- Cart / Orders Badge Indicator -->
-                    <div id="cartButtonWrapper" class="relative">
-                        <button id="openCartBtn" class="p-2.5 text-agri-100 hover:text-white bg-agri-800/80 hover:bg-agri-800 rounded-xl relative transition border border-agri-700/50">
-                            <i class="fa-solid fa-cart-shopping text-lg"></i>
-                            <span id="cartCountBadge" class="absolute -top-1.5 -right-1.5 bg-amber-500 text-slate-950 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full shadow hidden">0</span>
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- MAIN CONTENT BODY -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
-        
-        <section class="relative rounded-3xl overflow-hidden bg-gradient-to-r from-agri-900 via-agri-800 to-emerald-900 text-white shadow-xl border border-agri-700/40 p-6 sm:p-10">
+    <!-- ASOSIY KONTENT -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6 sm:space-y-8 pb-12">
+
+        <!-- Hero -->
+        <section class="relative rounded-3xl overflow-hidden bg-gradient-to-r from-agri-900 via-agri-800 to-emerald-900 text-white shadow-xl border border-agri-700/40 p-5 sm:p-10">
             <div class="relative z-10 max-w-2xl space-y-4">
-                <span class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-full text-xs font-semibold border border-emerald-500/30">
-                    <i class="fa-solid fa-shield-halved text-amber-400"></i> Escrow Kafolati & Shaffof Narx
+                <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-500/20 text-emerald-300 rounded-full text-xs font-semibold border border-emerald-500/30">
+                    <i class="fa-solid fa-shield-halved text-amber-400"></i> Escrow kafolati va shaffof narx
                 </span>
                 <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
-                    Fermerdan To'g'ridan-To'g'ri Xarid Qiling — Vositachisiz va Shaffof
+                    Fermerdan to'g'ridan-to'g'ri xarid qiling: vositachisiz va shaffof
                 </h1>
-                <p class="text-xs sm:text-sm text-agri-100 leading-relaxed opacity-95">
-                    Yirik restoranlar, supermarket tarmoqlari va ulgurji bozorlar uchun kafolatlangan sifat, optimallashtirilgan sovutgichli logistika va xavfsiz to'lov tizimi.
+                <p class="text-sm text-agri-100 leading-relaxed">
+                    Yirik restoranlar, supermarket tarmoqlari va ulgurji bozorlar uchun kafolatlangan sifat, sovutgichli logistika va xavfsiz to'lov tizimi.
                 </p>
-                <div class="pt-2 flex flex-wrap gap-3">
-                    <a href="#marketplaceSection" class="px-5 py-3 bg-agri-500 hover:bg-agri-600 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-agri-500/30 transition flex items-center gap-2">
-                        <i class="fa-solid fa-basket-shopping"></i> Mahsulotlarni Ko'rish
+                <div class="pt-2 flex flex-col sm:flex-row gap-3">
+                    <a href="#marketplaceSection" class="px-5 py-3 bg-agri-500 hover:bg-agri-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-agri-500/30 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-basket-shopping"></i> Mahsulotlarni ko'rish
                     </a>
-                    <button id="heroAddProductBtn" class="px-5 py-3 bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm rounded-xl border border-white/20 transition backdrop-blur-sm flex items-center gap-2">
-                        <i class="fa-solid fa-wheat-awn"></i> Hosil E'lon Qilish
-                    </button>
+                    <a id="heroAddProductBtn" href="/elon.html" class="px-5 py-3 bg-white/10 hover:bg-white/20 text-white font-bold text-sm rounded-xl border border-white/20 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-wheat-awn"></i> Hosil e'lon qilish
+                    </a>
                 </div>
             </div>
-            <!-- Decorative Background Leaf Icon -->
-            <div class="absolute -right-10 -bottom-10 opacity-10 text-white pointer-events-none hidden md:block">
+            <div class="absolute -right-10 -bottom-10 opacity-10 text-white pointer-events-none hidden md:block" aria-hidden="true">
                 <i class="fa-solid fa-seedling text-[280px]"></i>
             </div>
         </section>
 
+        <!-- XARIDOR KO'RINISHI -->
         <section id="buyerView" class="space-y-6">
-            <!-- Buyer Analytics Stats Bar -->
-            <div id="buyerStatsBar" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-3">
-                    <div class="p-3 bg-agri-50 text-agri-600 rounded-xl">
-                        <i class="fa-solid fa-truck-ramp-box text-xl"></i>
-                    </div>
-                    <div>
-                        <p class="text-[11px] font-semibold text-slate-400 uppercase">Faol Buyurtmalar</p>
-                        <h4 class="text-lg font-bold text-slate-800">3 ta yetkazilmoqda</h4>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 min-w-0">
+                    <div class="w-10 h-10 shrink-0 grid place-items-center bg-agri-50 text-agri-600 rounded-xl"><i class="fa-solid fa-boxes-stacked"></i></div>
+                    <div class="min-w-0">
+                        <p class="text-xs font-semibold text-slate-500">Faol e'lonlar</p>
+                        <p id="statListings" class="text-base sm:text-lg font-bold text-slate-800">0 ta</p>
                     </div>
                 </div>
-                <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-3">
-                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-                        <i class="fa-solid fa-vault text-xl"></i>
-                    </div>
-                    <div>
-                        <p class="text-[11px] font-semibold text-slate-400 uppercase">Escrow Depozit</p>
-                        <h4 class="text-lg font-bold text-slate-800">18,500,000 UZS</h4>
+                <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 min-w-0">
+                    <div class="w-10 h-10 shrink-0 grid place-items-center bg-emerald-50 text-emerald-600 rounded-xl"><i class="fa-solid fa-weight-hanging"></i></div>
+                    <div class="min-w-0">
+                        <p class="text-xs font-semibold text-slate-500">Jami mavjud hajm</p>
+                        <p id="statVolume" class="text-base sm:text-lg font-bold text-slate-800">0 t</p>
                     </div>
                 </div>
-                <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-3">
-                    <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
-                        <i class="fa-solid fa-handshake-angle text-xl"></i>
-                    </div>
-                    <div>
-                        <p class="text-[11px] font-semibold text-slate-400 uppercase">Tejalgan Vositachilik</p>
-                        <h4 class="text-lg font-bold text-emerald-600">~ 22% tejaldi</h4>
+                <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 min-w-0">
+                    <div class="w-10 h-10 shrink-0 grid place-items-center bg-amber-50 text-amber-600 rounded-xl"><i class="fa-solid fa-location-dot"></i></div>
+                    <div class="min-w-0">
+                        <p class="text-xs font-semibold text-slate-500">Hududlar</p>
+                        <p id="statRegions" class="text-base sm:text-lg font-bold text-slate-800">0 ta</p>
                     </div>
                 </div>
-                <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-3">
-                    <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
-                        <i class="fa-solid fa-users-between-lines text-xl"></i>
-                    </div>
-                    <div>
-                        <p class="text-[11px] font-semibold text-slate-400 uppercase">Tasdiqlangan Fermerlar</p>
-                        <h4 class="text-lg font-bold text-slate-800">140+ fermer</h4>
+                <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 min-w-0">
+                    <div class="w-10 h-10 shrink-0 grid place-items-center bg-blue-50 text-blue-600 rounded-xl"><i class="fa-solid fa-user-check"></i></div>
+                    <div class="min-w-0">
+                        <p class="text-xs font-semibold text-slate-500">Tasdiqlangan fermerlar</p>
+                        <p id="statVerified" class="text-base sm:text-lg font-bold text-slate-800">0 ta</p>
                     </div>
                 </div>
             </div>
 
-            <div id="marketplaceSection" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 space-y-4">
-                <div class="flex flex-col md:flex-row gap-3 items-center justify-between">
-                    <!-- Search Input Box -->
+            <!-- Qidiruv va filtrlar -->
+            <div id="marketplaceSection" class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200/80 space-y-4">
+                <div class="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
                     <div class="relative w-full md:w-96">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                        <input type="text" id="searchInput" placeholder="Mahsulot yoki fermer nomini qidirish..." 
-                               class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-agri-500 focus:bg-white transition">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm" aria-hidden="true"></i>
+                        <label for="searchInput" class="sr-only">Qidirish</label>
+                        <input type="search" id="searchInput" placeholder="Mahsulot yoki fermer nomi..."
+                               class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-agri-500 focus:bg-white transition">
                     </div>
 
-                    <!-- Region & Certification Filters -->
-                    <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-                        <!-- Region Dropdown -->
-                        <select id="regionFilter" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs sm:text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-agri-500">
-                            <option value="ALL">Barcha viloyatlar</option>
-                            <option value="Toshkent vil.">Toshkent vil.</option>
-                            <option value="Farg'ona">Farg'ona</option>
-                            <option value="Samarqand">Samarqand</option>
-                            <option value="Surxondaryo">Surxondaryo</option>
-                            <option value="Andijon">Andijon</option>
-                            <option value="Buxoro">Buxoro</option>
-                            <option value="Namangan">Namangan</option>
-                        </select>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:flex md:flex-wrap md:items-center gap-2 w-full md:w-auto">
+                        <label for="regionFilter" class="sr-only">Viloyat</label>
+                        <select id="regionFilter" class="w-full md:w-auto bg-slate-50 border border-slate-200 text-slate-700 text-base sm:text-sm rounded-xl px-3 py-3 md:py-2.5 focus:outline-none focus:ring-2 focus:ring-agri-500"><option value="ALL">Barcha viloyatlar</option><option value="Toshkent shahri">Toshkent shahri</option><option value="Toshkent viloyati">Toshkent viloyati</option><option value="Andijon">Andijon</option><option value="Buxoro">Buxoro</option><option value="Farg'ona">Farg'ona</option><option value="Jizzax">Jizzax</option><option value="Namangan">Namangan</option><option value="Navoiy">Navoiy</option><option value="Qashqadaryo">Qashqadaryo</option><option value="Samarqand">Samarqand</option><option value="Sirdaryo">Sirdaryo</option><option value="Surxondaryo">Surxondaryo</option><option value="Xorazm">Xorazm</option><option value="Qoraqalpog'iston Respublikasi">Qoraqalpog'iston Respublikasi</option></select>
 
-                        <!-- Certification Dropdown -->
-                        <select id="certFilter" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs sm:text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-agri-500">
+                        <label for="certFilter" class="sr-only">Sifat darajasi</label>
+                        <select id="certFilter" class="w-full md:w-auto bg-slate-50 border border-slate-200 text-slate-700 text-base sm:text-sm rounded-xl px-3 py-3 md:py-2.5 focus:outline-none focus:ring-2 focus:ring-agri-500">
                             <option value="ALL">Barcha sifat darajalari</option>
                             <option value="ORGANIC">Organik / Eco</option>
-                            <option value="PREMIUM">Premium Sertifikatlangan</option>
-                            <option value="STANDARD">Standart Standart</option>
+                            <option value="PREMIUM">Premium sertifikatlangan</option>
+                            <option value="STANDARD">Standart sifat</option>
                         </select>
 
-                        <!-- Availability Dropdown -->
-                        <select id="availabilityFilter" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs sm:text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-agri-500">
+                        <label for="availabilityFilter" class="sr-only">Yetkazish vaqti</label>
+                        <select id="availabilityFilter" class="w-full md:w-auto bg-slate-50 border border-slate-200 text-slate-700 text-base sm:text-sm rounded-xl px-3 py-3 md:py-2.5 focus:outline-none focus:ring-2 focus:ring-agri-500">
                             <option value="ALL">Barcha yetkazish vaqti</option>
-                            <option value="READY">Tayyor Omborda (Tezkor)</option>
-                            <option value="FUTURES">Hosil Shartnomasi (Fyuchers)</option>
+                            <option value="READY">Tayyor omborda (tezkor)</option>
+                            <option value="FUTURES">Hosil shartnomasi (fyuchers)</option>
                         </select>
 
-                        <button id="resetFiltersBtn" class="px-3 py-2.5 text-xs font-semibold text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition">
-                            <i class="fa-solid fa-rotate-left mr-1"></i> Tozalash
+                        <button id="resetFiltersBtn" type="button" class="w-full md:w-auto px-3 py-3 md:py-2.5 text-sm md:text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-rotate-left"></i> Tozalash
                         </button>
                     </div>
                 </div>
 
-                <!-- Category Navigation Chips -->
-                <div class="flex items-center gap-2 overflow-x-auto pb-1 pt-1 text-xs border-t border-slate-100 pt-3">
-                    <span class="text-slate-400 font-semibold uppercase text-[10px] tracking-wider whitespace-nowrap mr-2">Kategoriyalar:</span>
-                    <button class="cat-chip active-chip px-3.5 py-1.5 rounded-xl font-bold bg-agri-600 text-white shadow-sm transition whitespace-nowrap" data-category="ALL">Barchasi</button>
-                    <button class="cat-chip px-3.5 py-1.5 rounded-xl font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition whitespace-nowrap" data-category="Sabzavotlar">Sabzavotlar</button>
-                    <button class="cat-chip px-3.5 py-1.5 rounded-xl font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition whitespace-nowrap" data-category="Mevalar">Mevalar</button>
-                    <button class="cat-chip px-3.5 py-1.5 rounded-xl font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition whitespace-nowrap" data-category="Poliz">Poliz Mahsulotlari</button>
-                    <button class="cat-chip px-3.5 py-1.5 rounded-xl font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition whitespace-nowrap" data-category="Ko'katlar">Ko'katlar</button>
+                <!-- Kategoriyalar -->
+                <div class="flex items-center gap-2 overflow-x-auto no-scrollbar border-t border-slate-100 pt-3 -mx-1 px-1" id="chipRow">
+                    <span class="text-slate-500 font-semibold text-xs whitespace-nowrap mr-1">Kategoriya:</span>
+                    <button type="button" class="cat-chip" data-category="ALL">Barchasi</button>
+                    <button type="button" class="cat-chip" data-category="Sabzavotlar">Sabzavotlar</button>
+                    <button type="button" class="cat-chip" data-category="Mevalar">Mevalar</button>
+                    <button type="button" class="cat-chip" data-category="Poliz">Poliz mahsulotlari</button>
+                    <button type="button" class="cat-chip" data-category="Ko'katlar">Ko'katlar</button>
                 </div>
             </div>
 
-            <!-- Product Cards Output Grid -->
-            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                <!-- Injected via JavaScript -->
-            </div>
+            <!-- Mahsulotlar -->
+            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5"></div>
 
-            <!-- Empty State View -->
-            <div id="noProductsState" class="hidden text-center py-16 bg-white rounded-2xl border border-dashed border-slate-300 space-y-3">
-                <i class="fa-solid fa-wheat-awn-circle-exclamation text-5xl text-slate-300"></i>
-                <h3 class="text-base font-bold text-slate-700">Birorta ham e'lon topilmadi</h3>
-                <p class="text-xs text-slate-500 max-w-sm mx-auto">Tanlangan filtr bo'yicha mos keladigan mahsulot yo'q. Filtrlarni tozalab ko'ring.</p>
+            <div id="noProductsState" class="hidden text-center py-14 px-4 bg-white rounded-2xl border border-dashed border-slate-300 space-y-3">
+                <i class="fa-solid fa-wheat-awn-circle-exclamation text-5xl text-slate-300" aria-hidden="true"></i>
+                <h3 class="text-base font-bold text-slate-700">E'lon topilmadi</h3>
+                <p class="text-sm text-slate-500 max-w-sm mx-auto">Hozircha e'lon yo'q yoki filtrlarga mos mahsulot topilmadi. Filtrlarni tozalang yoki birinchi e'lonni joylashtiring.</p>
             </div>
         </section>
 
+        <!-- FERMER KO'RINISHI -->
         <section id="farmerView" class="hidden space-y-6">
-            <!-- Farmer Metrics Dashboard -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-400 uppercase">Jami Sotuvlar Summasi</p>
-                        <h3 class="text-2xl font-extrabold text-agri-900 mt-1">68,400,000 <span class="text-xs font-normal text-slate-500">UZS</span></h3>
-                        <span class="text-[11px] text-emerald-600 font-semibold inline-flex items-center gap-1 mt-1">
-                            <i class="fa-solid fa-arrow-up-right"></i> +18% o'tgan oyga nisbatan
-                        </span>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between gap-3 min-w-0">
+                    <div class="min-w-0">
+                        <p class="text-xs font-semibold text-slate-500">Jami zahira qiymati</p>
+                        <p class="text-2xl font-extrabold text-agri-900 mt-1 break-words"><span id="farmerStockValue">0</span> <span class="text-xs font-normal text-slate-500">UZS</span></p>
+                        <p class="text-xs text-slate-500 mt-1">Narx × mavjud hajm</p>
                     </div>
-                    <div class="p-3.5 bg-agri-50 text-agri-600 rounded-2xl">
-                        <i class="fa-solid fa-sack-dollar text-2xl"></i>
-                    </div>
+                    <div class="w-12 h-12 shrink-0 grid place-items-center bg-agri-50 text-agri-600 rounded-2xl"><i class="fa-solid fa-sack-dollar text-xl"></i></div>
                 </div>
 
-                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-400 uppercase">Faol B2B E'lonlaringiz</p>
-                        <h3 id="activeListingCount" class="text-2xl font-extrabold text-slate-800 mt-1">0 ta</h3>
-                        <span class="text-[11px] text-slate-500 font-medium inline-flex items-center gap-1 mt-1">
-                            <i class="fa-solid fa-eye text-slate-400"></i> Restoranlar va do'konlarga ochiq
-                        </span>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between gap-3 min-w-0">
+                    <div class="min-w-0">
+                        <p class="text-xs font-semibold text-slate-500">Faol e'lonlar</p>
+                        <p id="activeListingCount" class="text-2xl font-extrabold text-slate-800 mt-1">0 ta</p>
+                        <p class="text-xs text-slate-500 mt-1">Xaridorlarga ochiq</p>
                     </div>
-                    <div class="p-3.5 bg-amber-50 text-amber-600 rounded-2xl">
-                        <i class="fa-solid fa-boxes-stacked text-2xl"></i>
-                    </div>
+                    <div class="w-12 h-12 shrink-0 grid place-items-center bg-amber-50 text-amber-600 rounded-2xl"><i class="fa-solid fa-boxes-stacked text-xl"></i></div>
                 </div>
 
-                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-400 uppercase">Escrow kutilayotgan mablag'</p>
-                        <h3 class="text-2xl font-extrabold text-slate-800 mt-1">12,200,000 <span class="text-xs font-normal text-slate-500">UZS</span></h3>
-                        <span class="text-[11px] text-agri-600 font-medium inline-flex items-center gap-1 mt-1">
-                            <i class="fa-solid fa-truck-fast"></i> Yetkazilgach balansga o'tadi
-                        </span>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between gap-3 min-w-0">
+                    <div class="min-w-0">
+                        <p class="text-xs font-semibold text-slate-500">Buyurtma so'rovlari</p>
+                        <p id="farmerOrders" class="text-2xl font-extrabold text-slate-800 mt-1">0 ta</p>
+                        <p class="text-xs text-slate-500 mt-1">Shu sessiyada kelgan</p>
                     </div>
-                    <div class="p-3.5 bg-blue-50 text-blue-600 rounded-2xl">
-                        <i class="fa-solid fa-file-contract text-2xl"></i>
-                    </div>
+                    <div class="w-12 h-12 shrink-0 grid place-items-center bg-blue-50 text-blue-600 rounded-2xl"><i class="fa-solid fa-file-contract text-xl"></i></div>
                 </div>
             </div>
 
-            <!-- Farmer Inventory & Management -->
-            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+            <div class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                     <div>
-                        <h3 class="text-lg font-bold text-slate-800">Sizning Qishloq Xo'jaligi E'lonlaringiz</h3>
-                        <p class="text-xs text-slate-500">Mavjud hosil yoki kelgusi fyuchers e'lonlarini boshqarish</p>
+                        <h2 class="text-lg font-bold text-slate-800">Barcha e'lonlar</h2>
+                        <p class="text-sm text-slate-500">Bozordagi hozirgi e'lonlar ro'yxati</p>
                     </div>
-                    <button id="openAddModalDirect" class="px-4 py-2.5 bg-agri-600 hover:bg-agri-700 text-white text-xs font-bold rounded-xl transition shadow flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Yangi Hosil Joylashtirish
-                    </button>
+                    <a id="openAddModalDirect" href="/elon.html" class="px-4 py-3 sm:py-2.5 bg-agri-600 hover:bg-agri-700 text-white text-sm sm:text-xs font-bold rounded-xl transition shadow flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Yangi hosil joylashtirish
+                    </a>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
+                <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+                    <table class="w-full min-w-[640px] text-left border-collapse">
                         <thead>
-                            <tr class="text-[11px] font-bold text-slate-400 uppercase border-b border-slate-100 bg-slate-50">
+                            <tr class="text-xs font-semibold text-slate-500 border-b border-slate-100 bg-slate-50">
                                 <th class="py-3 px-3">Mahsulot</th>
                                 <th class="py-3 px-3">Kategoriya</th>
-                                <th class="py-3 px-3">Zahira (Hajm)</th>
-                                <th class="py-3 px-3">Ulgurji Narxi</th>
-                                <th class="py-3 px-3">Sifat Turi</th>
-                                <th class="py-3 px-3 text-right">Amallar</th>
+                                <th class="py-3 px-3">Zahira</th>
+                                <th class="py-3 px-3">Narxi (1 kg)</th>
+                                <th class="py-3 px-3">Sifat</th>
                             </tr>
                         </thead>
-                        <tbody id="farmerTableBody" class="divide-y divide-slate-100 text-xs font-medium">
-                            <!-- Injected dynamically -->
-                        </tbody>
+                        <tbody id="farmerTableBody" class="divide-y divide-slate-100 text-xs font-medium"></tbody>
                     </table>
                 </div>
             </div>
         </section>
-
     </main>
 
-    <!-- MODAL 1: FARMER ADD PRODUCT FORM -->
-    <div id="addProductModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
-                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-tractor text-agri-600"></i> Yangi Hosil E'lonini Joylashtirish
-                </h3>
-                <button id="closeAddProductModalBtn" class="text-slate-400 hover:text-slate-600 p-1">
+    <!-- MODAL 2: Savat -->
+    <div id="cartModal" data-modal class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true" aria-labelledby="cartModalTitle">
+        <div tabindex="-1" class="bg-white w-full sm:max-w-xl rounded-t-3xl sm:rounded-2xl shadow-2xl border border-slate-100 flex flex-col max-h-[92dvh] outline-none">
+            <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-slate-100 shrink-0">
+                <h2 id="cartModalTitle" class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-cart-flatbed text-agri-600"></i> Ulgurji buyurtma
+                </h2>
+                <button id="closeCartBtn" type="button" aria-label="Yopish" class="w-10 h-10 grid place-items-center text-slate-400 hover:text-slate-700 rounded-lg">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
 
-            <form id="addProductForm" class="space-y-4 pt-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Mahsulot Nomi</label>
-                    <input type="text" id="pName" required placeholder="Masalan: Samarqand Qizil Pomidori" class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-agri-500 focus:bg-white focus:outline-none">
-                </div>
+            <div id="cartItemsList" class="flex-1 min-h-[7rem] overflow-y-auto px-5 py-4 space-y-3"></div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Kategoriya</label>
-                        <select id="pCategory" class="w-full px-3 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-agri-500 focus:outline-none">
-                            <option value="Sabzavotlar">Sabzavotlar</option>
-                            <option value="Mevalar">Mevalar</option>
-                            <option value="Poliz">Poliz Mahsulotlari</option>
-                            <option value="Ko'katlar">Ko'katlar</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Viloyat / Hudud</label>
-                        <select id="pRegion" class="w-full px-3 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-agri-500 focus:outline-none">
-                            <option value="Toshkent vil.">Toshkent vil.</option>
-                            <option value="Farg'ona">Farg'ona</option>
-                            <option value="Samarqand">Samarqand</option>
-                            <option value="Surxondaryo">Surxondaryo</option>
-                            <option value="Andijon">Andijon</option>
-                            <option value="Buxoro">Buxoro</option>
-                            <option value="Namangan">Namangan</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Umumiy Hajm (kg/tonna)</label>
-                        <input type="number" id="pQuantity" min="50" step="50" required placeholder="Masalan: 5000" class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-agri-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Min Buyurtma MOQ (kg)</label>
-                        <input type="number" id="pMinOrder" min="10" step="10" required placeholder="Masalan: 200" class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-agri-500 focus:outline-none">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Narxi (1 kg UZS)</label>
-                        <input type="number" id="pPrice" min="100" step="100" required placeholder="Masalan: 4500" class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-agri-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Sifat & Sertifikat</label>
-                        <select id="pQuality" class="w-full px-3 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-agri-500 focus:outline-none">
-                            <option value="ORGANIC">Organik Eco</option>
-                            <option value="PREMIUM">Premium Sertifikat</option>
-                            <option value="STANDARD">Standart Sifat</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Rasm Havolasi (URL)</label>
-                    <input type="url" id="pImageUrl" placeholder="https://images.unsplash.com/..." class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-agri-500 focus:outline-none">
-                    <p class="text-[10px] text-slate-400 mt-1">Bo'sh qoldirilsa, mos standart rasm tanlanadi.</p>
-                </div>
-
-                <button type="submit" class="w-full py-3 px-4 bg-agri-600 hover:bg-agri-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-paper-plane"></i> Bozorga Joylashtirish
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL 2: B2B ESCROW CHECKOUT & LOGISTICS CALCULATOR -->
-    <div id="cartModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]">
-            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
-                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-cart-flatbed text-agri-600"></i> Ulgurji Buyurtma va Escrow Logistika
-                </h3>
-                <button id="closeCartBtn" class="text-slate-400 hover:text-slate-600 p-1">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <!-- Cart Items Scroll -->
-            <div id="cartItemsList" class="flex-1 overflow-y-auto py-4 space-y-3">
-                <!-- Cart items added dynamically -->
-            </div>
-
-            <!-- Logistics and Escrow Calculation Footer -->
-            <div class="pt-4 border-t border-slate-100 space-y-3 bg-slate-50/80 -mx-6 -mb-6 p-6 rounded-b-2xl">
-                <!-- Logistics Transport Type Selection -->
-                <div class="space-y-2">
-                    <label class="block text-xs font-bold text-slate-700">Refrizherator va Logistika Turi:</label>
-                    <select id="logisticsTypeSelect" class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-agri-500">
-                        <option value="REF_EXPRESS">Sovutgichli Avto Ekspress (Tezkor va xavfsiz)</option>
-                        <option value="STANDARD_TRUCK">Standart Yuk Mashinasi (Arzonroq)</option>
+            <div class="shrink-0 border-t border-slate-100 bg-slate-50 p-5 space-y-3 rounded-b-2xl pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+                <div class="space-y-1.5">
+                    <label for="logisticsTypeSelect" class="block text-sm font-semibold text-slate-700">Logistika turi</label>
+                    <select id="logisticsTypeSelect" class="w-full px-3 py-3 text-base sm:text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-agri-500 focus:outline-none">
+                        <option value="REF_EXPRESS">Sovutgichli avto, ekspress (tezkor va xavfsiz)</option>
+                        <option value="STANDARD_TRUCK">Standart yuk mashinasi (arzonroq)</option>
                     </select>
                 </div>
 
-                <div class="space-y-1.5 text-xs pt-2">
-                    <div class="flex justify-between text-slate-500">
-                        <span>Mahsulotlar Summasi:</span>
-                        <span id="cartSubtotalText" class="font-bold text-slate-800">0 UZS</span>
+                <div class="space-y-1.5 text-sm pt-1">
+                    <div class="flex justify-between gap-3 text-slate-600">
+                        <span>Mahsulotlar summasi</span>
+                        <span id="cartSubtotalText" class="font-bold text-slate-800 whitespace-nowrap">0 UZS</span>
                     </div>
-                    <div class="flex justify-between text-slate-500">
-                        <span>Logistika xizmati (Hisoblangan):</span>
-                        <span id="logisticsCostText" class="font-bold text-slate-800">180,000 UZS</span>
+                    <div class="flex justify-between gap-3 text-slate-600">
+                        <span>Logistika (taxminiy)</span>
+                        <span id="logisticsCostText" class="font-bold text-slate-800 whitespace-nowrap">0 UZS</span>
                     </div>
-                    <div class="flex justify-between text-slate-500">
-                        <span class="flex items-center gap-1 text-agri-700 font-bold">
-                            <i class="fa-solid fa-shield text-agri-600"></i> Escrow Depozit Kafolati:
-                        </span>
-                        <span class="text-agri-700 font-bold">0% BEPUL</span>
-                    </div>
-                    <div class="flex justify-between text-base font-extrabold text-slate-900 pt-2 border-t border-slate-200">
-                        <span>Jami To'lov:</span>
-                        <span id="cartTotalText" class="text-agri-700">0 UZS</span>
+                    <div class="flex justify-between gap-3 text-base font-extrabold text-slate-900 pt-2 border-t border-slate-200">
+                        <span>Jami</span>
+                        <span id="cartTotalText" class="text-agri-700 whitespace-nowrap">0 UZS</span>
                     </div>
                 </div>
 
-                <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-[11px] text-amber-900 flex items-start gap-2">
-                    <i class="fa-solid fa-lock text-amber-600 mt-0.5"></i>
-                    <span>Mablağ Escrow xavfsiz hisobida saqlanadi. Mahsulot va sifat qabul qilingandan so'ng fermerga o'tkaziladi.</span>
+                <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 flex items-start gap-2">
+                    <i class="fa-solid fa-lock text-amber-600 mt-0.5" aria-hidden="true"></i>
+                    <span>Escrow to'lov tizimi hali ulanmagan. Hozircha buyurtma fermerga so'rov sifatida yuboriladi, pul yechilmaydi.</span>
                 </div>
 
-                <button id="checkoutBtn" class="w-full py-3 bg-agri-600 hover:bg-agri-700 text-white font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-shield-halved"></i> Escrow Depoziti Bilan Tasdiqlash
+                <button id="checkoutBtn" type="button" class="w-full py-3.5 bg-agri-600 hover:bg-agri-700 text-white font-bold text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i> Buyurtma so'rovini yuborish
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- TOAST NOTIFICATION -->
-    <div id="toastNotification" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center space-x-3 transform translate-y-20 opacity-0 transition-all duration-300 border border-slate-700">
-        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
-        <span id="toastMessage" class="text-xs font-semibold">Bajarildi</span>
+    <!-- Xabarnoma -->
+    <div id="toastNotification" role="status" aria-live="polite" class="pointer-events-none fixed bottom-4 left-4 right-4 sm:left-auto sm:right-5 sm:bottom-5 sm:max-w-sm z-[60] bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 transform translate-y-24 opacity-0 transition-all duration-300 border border-slate-700">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-lg shrink-0"></i>
+        <span id="toastMessage" class="text-sm font-semibold"></span>
     </div>
 
     <script>
-        // Default Mock Data for Agriculture Products
-        const INITIAL_PRODUCTS = [
-            {
-                id: 1,
-                name: "Navoiy Qizil Sabzisi (Ulgurji)",
-                category: "Sabzavotlar",
-                farmer: "Erkin Rahimov",
-                verified: true,
-                region: "Samarqand",
-                price: 2800,
-                quantity: 12000,
-                minOrder: 500,
-                harvestDate: "Bugun 06:00 terilgan",
-                quality: "ORGANIC",
-                availability: "READY",
-                image: "https://images.unsplash.com/photo-1598170845058-12ef4a457939?auto=format&fit=crop&w=600&q=80",
-                rating: 4.9
-            },
-            {
-                id: 2,
-                name: "Beshariq Qizil Pomidori (A'lo Sifat)",
-                category: "Sabzavotlar",
-                farmer: "Farg'ona Agro MChJ",
-                verified: true,
-                region: "Farg'ona",
-                price: 8500,
-                quantity: 4500,
-                minOrder: 200,
-                harvestDate: "Kechagilardan",
-                quality: "PREMIUM",
-                availability: "READY",
-                image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=600&q=80",
-                rating: 4.8
-            },
-            {
-                id: 3,
-                name: "Samarqand Shirin Olmasi (Gala)",
-                category: "Mevalar",
-                farmer: "Zarafshon Bog'lari",
-                verified: true,
-                region: "Samarqand",
-                price: 11000,
-                quantity: 8000,
-                minOrder: 300,
-                harvestDate: "2 kun oldin",
-                quality: "ORGANIC",
-                availability: "READY",
-                image: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=600&q=80",
-                rating: 5.0
-            },
-            {
-                id: 4,
-                name: "Surxon Erta Pishar Qovuni (Torpeda)",
-                category: "Poliz",
-                farmer: "Termiz Agro Fermer",
-                verified: false,
-                region: "Surxondaryo",
-                price: 6000,
-                quantity: 15000,
-                minOrder: 1000,
-                harvestDate: "15 kundan so'ng teriladi",
-                quality: "STANDARD",
-                availability: "FUTURES",
-                image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=600&q=80",
-                rating: 4.7
-            },
-            {
-                id: 5,
-                name: "Yangi Uzilgan Ukrop va Keshnich",
-                category: "Ko'katlar",
-                farmer: "Toshkent Issiqxona Kompleksi",
-                verified: true,
-                region: "Toshkent vil.",
-                price: 15000,
-                quantity: 800,
-                minOrder: 50,
-                harvestDate: "Hozirgina uzildi",
-                quality: "ORGANIC",
-                availability: "READY",
-                image: "https://images.unsplash.com/photo-1515471209610-dae1c92d877f?auto=format&fit=crop&w=600&q=80",
-                rating: 4.9
-            },
-            {
-                id: 6,
-                name: "Buxoro Oq Piyoz (Eksportbop)",
-                category: "Sabzavotlar",
-                farmer: "Buxoro Sanoat Agro",
-                verified: true,
-                region: "Buxoro",
-                price: 3200,
-                quantity: 25000,
-                minOrder: 2000,
-                harvestDate: "Omborda tayyor",
-                quality: "PREMIUM",
-                availability: "READY",
-                image: "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cf?auto=format&fit=crop&w=600&q=80",
-                rating: 4.6
-            }
-        ];
+        // ===== Sozlamalar =====
+        // Backend tayyor bo'lganda shu yerga manzilni yozing, masalan: "https://api.sizning-sayt.uz/api"
+        // E'lonlar faqat backenddan olinadi (demo e'lonlar yo'q).
+        const API_URL = "/api";
 
-        // State Variables
-        let products = [...INITIAL_PRODUCTS];
+        // Logistika narxlari taxminiy (UZS). Haqiqiy tariflarga almashtiring.
+        const LOGISTICS_COST = { REF_EXPRESS: 180000, STANDARD_TRUCK: 120000 };
+
+        const PLACEHOLDER_IMG = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400"><rect width="600" height="400" fill="#dcfce7"/>' +
+            '<text x="300" y="215" font-family="sans-serif" font-size="32" font-weight="700" fill="#15803d" text-anchor="middle">AgriEko</text></svg>'
+        );
+
+        const QUALITY = {
+            ORGANIC:  { label: 'Organik Eco', icon: 'fa-leaf',  cls: 'bg-emerald-600 text-white' },
+            PREMIUM:  { label: 'Premium',     icon: 'fa-award', cls: 'bg-amber-500 text-slate-900' },
+            STANDARD: { label: 'Standart',    icon: 'fa-check', cls: 'bg-slate-700 text-white' }
+        };
+
+        // ===== Yordamchi funksiyalar =====
+        const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const fmt = n => Number(n || 0).toLocaleString('en-US');
+        const safeUrl = u => {
+            try { const x = new URL(u); return (x.protocol === 'https:' || x.protocol === 'http:') ? x.href : ''; }
+            catch { return ''; }
+        };
+        const $ = id => document.getElementById(id);
+
+        // Rasm yuklanmasa, bir marta zaxira rasm qo'yiladi
+        document.addEventListener('error', e => {
+            const t = e.target;
+            if (t.tagName === 'IMG' && !t.dataset.fb) { t.dataset.fb = '1'; t.src = PLACEHOLDER_IMG; }
+        }, true);
+
+        // ===== Holat =====
+        let products = [];
         let cart = [];
-        let activeRole = 'BUYER';
+        let orders = [];
         let selectedCategory = 'ALL';
 
-        // DOM Elements
-        const buyerView = document.getElementById('buyerView');
-        const farmerView = document.getElementById('farmerView');
-        const roleBuyerBtn = document.getElementById('roleBuyerBtn');
-        const roleFarmerBtn = document.getElementById('roleFarmerBtn');
-        const productGrid = document.getElementById('productGrid');
-        const noProductsState = document.getElementById('noProductsState');
-        const addProductModal = document.getElementById('addProductModal');
+        // ===== Rol almashtirgich =====
+        const ROLE_BASE = 'flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition leading-tight';
+        const ROLE_ON = ' bg-white text-agri-900 shadow';
+        const ROLE_OFF = ' text-agri-200 hover:text-white';
+        const roleBuyerBtn = $('roleBuyerBtn');
+        const roleFarmerBtn = $('roleFarmerBtn');
+        roleBuyerBtn.innerHTML = '<i class="fa-solid fa-utensils"></i><span>Restoran / Do\'kon</span>';
+        roleFarmerBtn.innerHTML = '<i class="fa-solid fa-tractor"></i><span>Fermer (Sotuvchi)</span>';
 
-        function renderProducts() {
-            const searchVal = document.getElementById('searchInput').value.toLowerCase();
-            const regionVal = document.getElementById('regionFilter').value;
-            const certVal = document.getElementById('certFilter').value;
-            const availVal = document.getElementById('availabilityFilter').value;
+        function setRole(role) {
+            const buyer = role === 'BUYER';
+            $('buyerView').classList.toggle('hidden', !buyer);
+            $('farmerView').classList.toggle('hidden', buyer);
+            roleBuyerBtn.className = ROLE_BASE + (buyer ? ROLE_ON : ROLE_OFF);
+            roleFarmerBtn.className = ROLE_BASE + (buyer ? ROLE_OFF : ROLE_ON);
+            roleBuyerBtn.setAttribute('aria-pressed', String(buyer));
+            roleFarmerBtn.setAttribute('aria-pressed', String(!buyer));
+            if (!buyer) renderFarmerTable();
+        }
+        roleBuyerBtn.addEventListener('click', () => setRole('BUYER'));
+        roleFarmerBtn.addEventListener('click', () => setRole('FARMER'));
+        $('brandBtn').addEventListener('click', () => { setRole('BUYER'); window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
-            const filtered = products.filter(item => {
-                const matchesSearch = item.name.toLowerCase().includes(searchVal) || item.farmer.toLowerCase().includes(searchVal);
-                const matchesCategory = selectedCategory === 'ALL' || item.category === selectedCategory;
-                const matchesRegion = regionVal === 'ALL' || item.region === regionVal;
-                const matchesCert = certVal === 'ALL' || item.quality === certVal;
-                const matchesAvail = availVal === 'ALL' || item.availability === availVal;
+        // ===== Kategoriya chiplari =====
+        const CHIP_BASE = 'cat-chip shrink-0 px-3.5 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ';
+        const CHIP_ON = 'bg-agri-600 text-white shadow-sm';
+        const CHIP_OFF = 'bg-slate-100 text-slate-600 hover:bg-slate-200';
 
-                return matchesSearch && matchesCategory && matchesRegion && matchesCert && matchesAvail;
-            });
-
-            productGrid.innerHTML = '';
-
-            if (filtered.length === 0) {
-                noProductsState.classList.remove('hidden');
-                return;
-            } else {
-                noProductsState.classList.add('hidden');
-            }
-
-            filtered.forEach(item => {
-                const card = document.createElement('div');
-                card.className = "bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col justify-between group";
-                
-                let qualityBadge = '';
-                if (item.quality === 'ORGANIC') {
-                    qualityBadge = `<span class="px-2.5 py-1 bg-emerald-600/90 backdrop-blur-md text-white text-[10px] font-bold rounded-lg flex items-center gap-1 shadow-sm"><i class="fa-solid fa-leaf"></i> Organik Eco</span>`;
-                } else if (item.quality === 'PREMIUM') {
-                    qualityBadge = `<span class="px-2.5 py-1 bg-amber-500/90 backdrop-blur-md text-slate-900 text-[10px] font-bold rounded-lg flex items-center gap-1 shadow-sm"><i class="fa-solid fa-award"></i> Premium</span>`;
-                }
-
-                card.innerHTML = `
-                    <div>
-                        <!-- Image Area -->
-                        <div class="relative h-44 w-full bg-slate-100 overflow-hidden">
-                            <img src="${item.image}" alt="${item.name}" 
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                 onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80'">
-                            
-                            <div class="absolute top-3 left-3 flex flex-col gap-1">
-                                <span class="px-2.5 py-1 bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-semibold rounded-lg">
-                                    ${item.category}
-                                </span>
-                                ${qualityBadge}
-                            </div>
-
-                            <div class="absolute bottom-2 right-2 px-2 py-0.5 bg-white/90 backdrop-blur-md text-slate-800 text-[10px] font-bold rounded-md shadow-sm">
-                                <i class="fa-solid fa-location-dot text-agri-600 mr-1"></i>${item.region}
-                            </div>
-                        </div>
-
-                        <!-- Card Body Details -->
-                        <div class="p-4 space-y-2">
-                            <div class="flex items-center justify-between text-[11px] text-slate-500">
-                                <span class="flex items-center gap-1">
-                                    <i class="fa-solid fa-user-check text-agri-600"></i> ${item.farmer}
-                                    ${item.verified ? `<i class="fa-solid fa-circle-check text-blue-500 text-[11px]" title="Tasdiqlangan fermer"></i>` : ''}
-                                </span>
-                                <span class="text-amber-600 font-bold"><i class="fa-solid fa-star mr-0.5"></i>${item.rating}</span>
-                            </div>
-
-                            <h4 class="text-sm font-bold text-slate-800 line-clamp-1">${item.name}</h4>
-
-                            <div class="flex items-center justify-between pt-1">
-                                <div>
-                                    <span class="text-[10px] text-slate-400 block">Ulgurji Narxi (1 kg)</span>
-                                    <span class="text-base font-extrabold text-agri-800">${item.price.toLocaleString()} <span class="text-xs font-normal text-slate-500">UZS</span></span>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-[10px] text-slate-400 block">Min. Buyurtma (MOQ)</span>
-                                    <span class="text-xs font-bold text-slate-700">${item.minOrder.toLocaleString()} kg</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Footer Action Buttons -->
-                    <div class="px-4 pb-4 pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
-                        <span class="text-[10px] text-slate-400 flex items-center gap-1">
-                            <i class="fa-regular fa-clock"></i> ${item.harvestDate}
-                        </span>
-                        <button onclick="addToCart(${item.id})" class="px-3.5 py-2 bg-agri-50 hover:bg-agri-600 text-agri-700 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-agri-200 hover:border-agri-600 shadow-sm">
-                            <i class="fa-solid fa-cart-plus"></i> Buyurtma
-                        </button>
-                    </div>
-                `;
-                productGrid.appendChild(card);
+        function paintChips() {
+            document.querySelectorAll('.cat-chip').forEach(c => {
+                const on = c.dataset.category === selectedCategory;
+                c.className = CHIP_BASE + (on ? CHIP_ON : CHIP_OFF);
+                c.setAttribute('aria-pressed', String(on));
             });
         }
-
-        function renderFarmerTable() {
-            const tbody = document.getElementById('farmerTableBody');
-            tbody.innerHTML = '';
-
-            products.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition";
-                tr.innerHTML = `
-                    <td class="py-3 px-3 font-bold text-slate-800 flex items-center gap-2">
-                        <img src="${item.image}" class="w-8 h-8 rounded-lg object-cover" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80'">
-                        <div>
-                            <div>${item.name}</div>
-                            <div class="text-[10px] font-normal text-slate-400">${item.region}</div>
-                        </div>
-                    </td>
-                    <td class="py-3 px-3 text-slate-600">${item.category}</td>
-                    <td class="py-3 px-3 font-bold text-slate-700">${item.quantity.toLocaleString()} kg</td>
-                    <td class="py-3 px-3 text-agri-800 font-bold">${item.price.toLocaleString()} UZS</td>
-                    <td class="py-3 px-3">
-                        <span class="px-2 py-0.5 text-[10px] font-bold bg-emerald-100 text-emerald-800 rounded-full">
-                            ${item.quality}
-                        </span>
-                    </td>
-                    <td class="py-3 px-3 text-right">
-                        <button onclick="deleteProduct(${item.id})" class="text-slate-400 hover:text-red-500 p-1.5 transition">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            document.getElementById('activeListingCount').innerText = `${products.length} ta`;
-        }
-
-        function addToCart(productId) {
-            const product = products.find(p => p.id === productId);
-            if (!product) return;
-
-            const existing = cart.find(c => c.product.id === productId);
-            if (existing) {
-                existing.cartQty += product.minOrder;
-            } else {
-                cart.push({
-                    product: product,
-                    cartQty: product.minOrder
-                });
-            }
-
-            updateCartUI();
-            showToast(`${product.name} (${product.minOrder}kg) savatchaga qo'shildi!`);
-        }
-
-        function updateCartUI() {
-            const badge = document.getElementById('cartCountBadge');
-            const cartList = document.getElementById('cartItemsList');
-
-            if (cart.length > 0) {
-                badge.innerText = cart.length;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
-
-            cartList.innerHTML = '';
-
-            if (cart.length === 0) {
-                cartList.innerHTML = `
-                    <div class="text-center py-10 text-slate-400">
-                        <i class="fa-solid fa-cart-arrow-down text-4xl mb-2"></i>
-                        <p class="text-xs">Savatchingiz bo'sh. Mahsulotlarni tanlang.</p>
-                    </div>
-                `;
-                document.getElementById('cartSubtotalText').innerText = '0 UZS';
-                document.getElementById('cartTotalText').innerText = '0 UZS';
-                return;
-            }
-
-            let subtotal = 0;
-
-            cart.forEach((item, index) => {
-                const itemTotal = item.product.price * item.cartQty;
-                subtotal += itemTotal;
-
-                const div = document.createElement('div');
-                div.className = "flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs";
-                div.innerHTML = `
-                    <div class="flex items-center space-x-3">
-                        <img src="${item.product.image}" class="w-10 h-10 rounded-lg object-cover">
-                        <div>
-                            <h5 class="font-bold text-slate-800">${item.product.name}</h5>
-                            <span class="text-[10px] text-slate-500">${item.product.farmer} • ${item.product.price.toLocaleString()} UZS/kg</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <div class="flex items-center space-x-1 border border-slate-200 rounded-lg bg-white p-1">
-                            <button onclick="changeQty(${index}, -${item.product.minOrder})" class="px-1.5 py-0.5 hover:bg-slate-100 rounded text-slate-600 font-bold">-</button>
-                            <span class="px-1.5 font-bold text-slate-800">${item.cartQty} kg</span>
-                            <button onclick="changeQty(${index}, ${item.product.minOrder})" class="px-1.5 py-0.5 hover:bg-slate-100 rounded text-slate-600 font-bold">+</button>
-                        </div>
-                        <span class="font-bold text-agri-800">${itemTotal.toLocaleString()} UZS</span>
-                    </div>
-                `;
-                cartList.appendChild(div);
-            });
-
-            const logisticsCost = 180000;
-            document.getElementById('cartSubtotalText').innerText = `${subtotal.toLocaleString()} UZS`;
-            document.getElementById('logisticsCostText').innerText = `${logisticsCost.toLocaleString()} UZS`;
-            document.getElementById('cartTotalText').innerText = `${(subtotal + logisticsCost).toLocaleString()} UZS`;
-        }
-
-        function changeQty(index, delta) {
-            cart[index].cartQty += delta;
-            if (cart[index].cartQty < cart[index].product.minOrder) {
-                cart.splice(index, 1);
-            }
-            updateCartUI();
-        }
-
-        function deleteProduct(id) {
-            products = products.filter(p => p.id !== id);
-            renderProducts();
-            renderFarmerTable();
-            showToast("E'lon o'chirildi", "info");
-        }
-
-        // Form Handler for Adding Product
-        document.getElementById('addProductForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const name = document.getElementById('pName').value;
-            const category = document.getElementById('pCategory').value;
-            const region = document.getElementById('pRegion').value;
-            const quantity = parseFloat(document.getElementById('pQuantity').value);
-            const minOrder = parseFloat(document.getElementById('pMinOrder').value);
-            const price = parseFloat(document.getElementById('pPrice').value);
-            const quality = document.getElementById('pQuality').value;
-            let image = document.getElementById('pImageUrl').value;
-
-            if (!image) {
-                image = "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80";
-            }
-
-            const newProduct = {
-                id: Date.now(),
-                name,
-                category,
-                farmer: "Sizning Fermer Xo'jaligingiz",
-                verified: true,
-                region,
-                price,
-                quantity,
-                minOrder,
-                harvestDate: "Hozirgina qo'shildi",
-                quality,
-                availability: "READY",
-                image,
-                rating: 5.0
-            };
-
-            products.unshift(newProduct);
-            renderProducts();
-            renderFarmerTable();
-
-            e.target.reset();
-            addProductModal.classList.add('hidden');
-            showToast("Yangi hosil e'loni B2B bozorga joylashtirildi!");
-        });
-
-        // Checkout Button Click
-        document.getElementById('checkoutBtn').addEventListener('click', () => {
-            if (cart.length === 0) {
-                showToast("Savatda mahsulot mavjud emas!", "error");
-                return;
-            }
-
-            document.getElementById('cartModal').classList.add('hidden');
-            cart = [];
-            updateCartUI();
-            showToast("Escrow Shartnomasi rasmiylashtirildi! Mablag' depozitda muzlatildi.", "success");
-        });
-
-        // Role Switcher Click Handlers
-        roleBuyerBtn.addEventListener('click', () => {
-            activeRole = 'BUYER';
-            buyerView.classList.remove('hidden');
-            farmerView.classList.add('hidden');
-
-            roleBuyerBtn.className = "px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-white text-agri-900 shadow";
-            roleFarmerBtn.className = "px-3.5 py-2 rounded-xl text-xs font-bold text-agri-200 hover:text-white transition flex items-center gap-2";
-        });
-
-        roleFarmerBtn.addEventListener('click', () => {
-            activeRole = 'FARMER';
-            buyerView.classList.add('hidden');
-            farmerView.classList.remove('hidden');
-
-            roleFarmerBtn.className = "px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-white text-agri-900 shadow";
-            roleBuyerBtn.className = "px-3.5 py-2 rounded-xl text-xs font-bold text-agri-200 hover:text-white transition flex items-center gap-2";
-            
-            renderFarmerTable();
-        });
-
-        // Category Filter Chips Navigation
         document.querySelectorAll('.cat-chip').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.cat-chip').forEach(c => {
-                    c.className = "cat-chip px-3.5 py-1.5 rounded-xl font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition whitespace-nowrap";
-                });
-                btn.className = "cat-chip active-chip px-3.5 py-1.5 rounded-xl font-bold bg-agri-600 text-white shadow-sm transition whitespace-nowrap";
-                selectedCategory = btn.getAttribute('data-category');
+                selectedCategory = btn.dataset.category;
+                paintChips();
                 renderProducts();
             });
         });
 
-        // Modal Triggers
-        document.getElementById('quickAddProductBtn').addEventListener('click', () => addProductModal.classList.remove('hidden'));
-        document.getElementById('heroAddProductBtn').addEventListener('click', () => addProductModal.classList.remove('hidden'));
-        document.getElementById('openAddModalDirect').addEventListener('click', () => addProductModal.classList.remove('hidden'));
-        document.getElementById('closeAddProductModalBtn').addEventListener('click', () => addProductModal.classList.add('hidden'));
+        // ===== Statistika (haqiqiy ma'lumotdan hisoblanadi) =====
+        function updateStats() {
+            const tons = products.reduce((s, p) => s + Number(p.quantity || 0), 0) / 1000;
+            $('statListings').textContent = `${products.length} ta`;
+            $('statVolume').textContent = `${tons.toLocaleString('en-US', { maximumFractionDigits: 1 })} t`;
+            $('statRegions').textContent = `${new Set(products.map(p => p.region)).size} ta`;
+            $('statVerified').textContent = `${new Set(products.filter(p => p.verified).map(p => p.farmer)).size} ta`;
 
-        document.getElementById('openCartBtn').addEventListener('click', () => document.getElementById('cartModal').classList.remove('hidden'));
-        document.getElementById('closeCartBtn').addEventListener('click', () => document.getElementById('cartModal').classList.add('hidden'));
+            $('farmerStockValue').textContent = fmt(products.reduce((s, p) => s + p.price * p.quantity, 0));
+            $('activeListingCount').textContent = `${products.length} ta`;
+            $('farmerOrders').textContent = `${orders.length} ta`;
+        }
 
-        // Filter Inputs Event Listeners
-        document.getElementById('searchInput').addEventListener('input', renderProducts);
-        document.getElementById('regionFilter').addEventListener('change', renderProducts);
-        document.getElementById('certFilter').addEventListener('change', renderProducts);
-        document.getElementById('availabilityFilter').addEventListener('change', renderProducts);
-        
-        document.getElementById('resetFiltersBtn').addEventListener('click', () => {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('regionFilter').value = 'ALL';
-            document.getElementById('certFilter').value = 'ALL';
-            document.getElementById('availabilityFilter').value = 'ALL';
+        // ===== Mahsulot kartochkalari =====
+        function productCard(item) {
+            const q = QUALITY[item.quality] || QUALITY.STANDARD;
+            const img = safeUrl(item.image) || PLACEHOLDER_IMG;
+            const phone = String(item.phone || '').replace(/[^\d+]/g, '');
+            return `
+            <article class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-shadow hover:shadow-md">
+                <div class="relative aspect-[3/2] overflow-hidden bg-slate-100">
+                    <img src="${esc(img)}" alt="${esc(item.name)}" loading="lazy" width="600" height="400"
+                         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105">
+                    <div class="absolute left-3 top-3 flex flex-col items-start gap-1">
+                        <span class="rounded-lg bg-slate-900/80 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">${esc(item.category)}</span>
+                        <span class="${q.cls} flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-bold shadow-sm"><i class="fa-solid ${q.icon}"></i>${q.label}</span>
+                    </div>
+                    <span class="absolute bottom-2 right-2 rounded-md bg-white/90 px-2 py-1 text-[11px] font-bold text-slate-800 shadow-sm backdrop-blur">
+                        <i class="fa-solid fa-location-dot mr-1 text-agri-600"></i>${esc(item.region)}
+                    </span>
+                </div>
+
+                <div class="flex flex-1 flex-col gap-2 p-4">
+                    <div class="flex items-center justify-between gap-2 text-xs text-slate-600">
+                        <span class="flex min-w-0 items-center gap-1.5">
+                            <i class="fa-solid fa-user-check shrink-0 text-agri-600"></i>
+                            <span class="truncate">${esc(item.farmer)}</span>
+                            ${item.verified ? '<i class="fa-solid fa-circle-check shrink-0 text-blue-500" title="Tasdiqlangan fermer"></i>' : ''}
+                        </span>
+                        ${item.rating ? `<span class="shrink-0 font-bold text-amber-600"><i class="fa-solid fa-star mr-0.5"></i>${esc(item.rating)}</span>` : ''}
+                    </div>
+
+                    <h3 class="line-clamp-2 text-sm font-bold leading-snug text-slate-800">${esc(item.name)}</h3>
+
+                    <div class="mt-auto flex items-end justify-between gap-3 pt-1">
+                        <div class="min-w-0">
+                            <span class="block text-xs text-slate-500">Ulgurji narx (1 kg)</span>
+                            <span class="text-base font-extrabold text-agri-800">${fmt(item.price)} <span class="text-xs font-normal text-slate-500">UZS</span></span>
+                        </div>
+                        <div class="text-right">
+                            <span class="block text-xs text-slate-500">Min. buyurtma</span>
+                            <span class="text-sm font-bold text-slate-700">${fmt(item.minOrder)} kg</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-4 py-3">
+                    <span class="flex min-w-0 items-center gap-1.5 text-xs text-slate-500">
+                        <i class="fa-regular fa-clock shrink-0"></i><span class="truncate">${esc(item.harvestDate)}</span>
+                    </span>
+                    <span class="flex items-center gap-2">
+                        ${phone ? `<a href="tel:${esc(phone)}" aria-label="Fermerga qo'ng'iroq qilish" class="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-slate-100"><i class="fa-solid fa-phone"></i></a>` : ''}
+                        <button type="button" data-add="${esc(item.id)}" class="flex h-10 items-center gap-1.5 rounded-xl border border-agri-200 bg-agri-50 px-4 text-xs font-bold text-agri-700 shadow-sm transition hover:border-agri-600 hover:bg-agri-600 hover:text-white">
+                            <i class="fa-solid fa-cart-plus"></i> Buyurtma
+                        </button>
+                    </span>
+                </div>
+            </article>`;
+        }
+
+        function renderProducts() {
+            const searchVal = $('searchInput').value.trim().toLowerCase();
+            const regionVal = $('regionFilter').value;
+            const certVal = $('certFilter').value;
+            const availVal = $('availabilityFilter').value;
+
+            const filtered = products.filter(item =>
+                (item.name.toLowerCase().includes(searchVal) || item.farmer.toLowerCase().includes(searchVal)) &&
+                (selectedCategory === 'ALL' || item.category === selectedCategory) &&
+                (regionVal === 'ALL' || item.region === regionVal) &&
+                (certVal === 'ALL' || item.quality === certVal) &&
+                (availVal === 'ALL' || item.availability === availVal)
+            );
+
+            $('productGrid').innerHTML = filtered.map(productCard).join('');
+            $('noProductsState').classList.toggle('hidden', filtered.length > 0);
+        }
+
+        function renderFarmerTable() {
+            $('farmerTableBody').innerHTML = products.map(item => {
+                const q = QUALITY[item.quality] || QUALITY.STANDARD;
+                return `
+                <tr class="transition hover:bg-slate-50">
+                    <td class="px-3 py-3">
+                        <div class="flex items-center gap-2">
+                            <img src="${esc(safeUrl(item.image) || PLACEHOLDER_IMG)}" alt="" width="32" height="32" loading="lazy" class="h-8 w-8 shrink-0 rounded-lg object-cover">
+                            <div class="min-w-0">
+                                <div class="font-bold text-slate-800">${esc(item.name)}</div>
+                                <div class="text-[11px] font-normal text-slate-500">${esc(item.region)}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-3 py-3 text-slate-600">${esc(item.category)}</td>
+                    <td class="px-3 py-3 font-bold text-slate-700 whitespace-nowrap">${fmt(item.quantity)} kg</td>
+                    <td class="px-3 py-3 font-bold text-agri-800 whitespace-nowrap">${fmt(item.price)} UZS</td>
+                    <td class="px-3 py-3"><span class="${q.cls} rounded-full px-2 py-0.5 text-[11px] font-bold whitespace-nowrap">${q.label}</span></td>
+                </tr>`;
+            }).join('');
+            updateStats();
+        }
+
+        // Kartochkadagi tugma (event delegation)
+        $('productGrid').addEventListener('click', e => {
+            const btn = e.target.closest('[data-add]');
+            if (btn) addToCart(btn.dataset.add);
+        });
+
+        // ===== Savat =====
+        function addToCart(productId) {
+            const product = products.find(p => String(p.id) === String(productId));
+            if (!product) return;
+            if (product.minOrder > product.quantity) { showToast("Bu mahsulotda hajm yetarli emas", 'error'); return; }
+
+            const existing = cart.find(c => String(c.product.id) === String(productId));
+            if (existing) {
+                if (existing.cartQty + product.minOrder > product.quantity) {
+                    showToast(`Omborda atigi ${fmt(product.quantity)} kg bor`, 'error');
+                    return;
+                }
+                existing.cartQty += product.minOrder;
+            } else {
+                cart.push({ product, cartQty: product.minOrder });
+            }
+            updateCartUI();
+            showToast(`${product.name} (${fmt(product.minOrder)} kg) savatga qo'shildi`);
+        }
+
+        function changeQty(index, delta) {
+            const it = cart[index];
+            if (!it) return;
+            const next = it.cartQty + delta;
+            if (next < it.product.minOrder) {
+                cart.splice(index, 1);
+            } else if (next > it.product.quantity) {
+                showToast(`Omborda atigi ${fmt(it.product.quantity)} kg bor`, 'error');
+                return;
+            } else {
+                it.cartQty = next;
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const badge = $('cartCountBadge');
+            const list = $('cartItemsList');
+
+            badge.textContent = cart.length;
+            badge.classList.toggle('hidden', cart.length === 0);
+
+            if (cart.length === 0) {
+                list.innerHTML = `
+                    <div class="py-10 text-center text-slate-400">
+                        <i class="fa-solid fa-cart-arrow-down mb-2 text-4xl" aria-hidden="true"></i>
+                        <p class="text-sm">Savat bo'sh. Mahsulotlardan tanlang.</p>
+                    </div>`;
+                $('cartSubtotalText').textContent = '0 UZS';
+                $('logisticsCostText').textContent = '0 UZS';
+                $('cartTotalText').textContent = '0 UZS';
+                return;
+            }
+
+            let subtotal = 0;
+            list.innerHTML = cart.map((item, index) => {
+                const itemTotal = item.product.price * item.cartQty;
+                subtotal += itemTotal;
+                return `
+                <div class="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm">
+                    <div class="flex items-center gap-3">
+                        <img src="${esc(safeUrl(item.product.image) || PLACEHOLDER_IMG)}" alt="" width="44" height="44" class="h-11 w-11 shrink-0 rounded-lg object-cover">
+                        <div class="min-w-0">
+                            <h3 class="line-clamp-2 font-bold leading-snug text-slate-800">${esc(item.product.name)}</h3>
+                            <span class="text-xs text-slate-500">${esc(item.product.farmer)} · ${fmt(item.product.price)} UZS/kg</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="flex items-center rounded-lg border border-slate-200 bg-white">
+                            <button type="button" data-qty="${index}" data-delta="${-item.product.minOrder}" aria-label="Kamaytirish" class="h-9 w-9 rounded-l-lg font-bold text-slate-600 hover:bg-slate-100">−</button>
+                            <span class="min-w-[4.5rem] px-2 text-center text-sm font-bold text-slate-800">${fmt(item.cartQty)} kg</span>
+                            <button type="button" data-qty="${index}" data-delta="${item.product.minOrder}" aria-label="Ko'paytirish" class="h-9 w-9 rounded-r-lg font-bold text-slate-600 hover:bg-slate-100">+</button>
+                        </div>
+                        <span class="font-bold text-agri-800 whitespace-nowrap">${fmt(itemTotal)} UZS</span>
+                    </div>
+                </div>`;
+            }).join('');
+
+            const logistics = LOGISTICS_COST[$('logisticsTypeSelect').value] || 0;
+            $('cartSubtotalText').textContent = `${fmt(subtotal)} UZS`;
+            $('logisticsCostText').textContent = `${fmt(logistics)} UZS`;
+            $('cartTotalText').textContent = `${fmt(subtotal + logistics)} UZS`;
+        }
+
+        $('cartItemsList').addEventListener('click', e => {
+            const btn = e.target.closest('[data-qty]');
+            if (btn) changeQty(Number(btn.dataset.qty), Number(btn.dataset.delta));
+        });
+        $('logisticsTypeSelect').addEventListener('change', updateCartUI);
+
+        $('checkoutBtn').addEventListener('click', () => {
+            if (cart.length === 0) { showToast("Savatda mahsulot yo'q", 'error'); return; }
+            const subtotal = cart.reduce((s, i) => s + i.product.price * i.cartQty, 0);
+            const logistics = LOGISTICS_COST[$('logisticsTypeSelect').value] || 0;
+            orders.push({ items: cart.map(i => ({ id: i.product.id, qty: i.cartQty })), total: subtotal + logistics, createdAt: Date.now() });
+            cart = [];
+            updateCartUI();
+            updateStats();
+            closeModal($('cartModal'));
+            showToast("Buyurtma so'rovi qabul qilindi. To'lov tizimi hali ulanmagan.", 'info');
+        });
+
+        // ===== Modallar =====
+        function openModal(el) {
+            el.classList.remove('hidden');
+            el.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+            const panel = el.firstElementChild;
+            if (panel) panel.focus();
+        }
+        function closeModal(el) {
+            el.classList.add('hidden');
+            el.classList.remove('flex');
+            if (!document.querySelector('[data-modal].flex')) document.body.classList.remove('overflow-hidden');
+        }
+        document.querySelectorAll('[data-modal]').forEach(m => {
+            m.addEventListener('click', e => { if (e.target === m) closeModal(m); });
+        });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') document.querySelectorAll('[data-modal].flex').forEach(closeModal);
+        });
+
+        $('openCartBtn').addEventListener('click', () => { updateCartUI(); openModal($('cartModal')); });
+        $('closeCartBtn').addEventListener('click', () => closeModal($('cartModal')));
+
+        // ===== Filtrlar =====
+        ['searchInput'].forEach(id => $(id).addEventListener('input', renderProducts));
+        ['regionFilter', 'certFilter', 'availabilityFilter'].forEach(id => $(id).addEventListener('change', renderProducts));
+        $('resetFiltersBtn').addEventListener('click', () => {
+            $('searchInput').value = '';
+            $('regionFilter').value = 'ALL';
+            $('certFilter').value = 'ALL';
+            $('availabilityFilter').value = 'ALL';
             selectedCategory = 'ALL';
-            document.querySelectorAll('.cat-chip').forEach(c => {
-                c.className = "cat-chip px-3.5 py-1.5 rounded-xl font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition whitespace-nowrap";
-            });
-            document.querySelector('[data-category="ALL"]').className = "cat-chip active-chip px-3.5 py-1.5 rounded-xl font-bold bg-agri-600 text-white shadow-sm transition whitespace-nowrap";
+            paintChips();
             renderProducts();
         });
 
-        function resetAllViews() {
-            roleBuyerBtn.click();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // Toast Helper
+        // ===== Xabarnoma =====
+        let toastTimer;
         function showToast(msg, type = 'success') {
-            const toast = document.getElementById('toastNotification');
-            const toastMsg = document.getElementById('toastMessage');
-            const toastIcon = document.getElementById('toastIcon');
-
-            toastMsg.innerText = msg;
-
-            if (type === 'error') {
-                toastIcon.className = "fa-solid fa-circle-xmark text-red-400 text-lg";
-            } else if (type === 'info') {
-                toastIcon.className = "fa-solid fa-circle-info text-blue-400 text-lg";
-            } else {
-                toastIcon.className = "fa-solid fa-circle-check text-emerald-400 text-lg";
-            }
-
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
+            const toast = $('toastNotification');
+            $('toastMessage').textContent = msg;
+            const icons = {
+                error: 'fa-solid fa-circle-xmark text-red-400 text-lg shrink-0',
+                info: 'fa-solid fa-circle-info text-blue-400 text-lg shrink-0',
+                success: 'fa-solid fa-circle-check text-emerald-400 text-lg shrink-0'
+            };
+            $('toastIcon').className = icons[type] || icons.success;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 3500);
         }
 
-        // Application Start Init
-        window.onload = function() {
+        // ===== Backenddan e'lonlarni yuklash (API_URL berilgan bo'lsa) =====
+        async function loadRemoteProducts() {
+            if (!API_URL) return;
+            try {
+                const res = await fetch(`${API_URL}/products/`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                products = data.map(r => ({
+                    id: r.id,
+                    name: r.title || r.name || 'Nomsiz mahsulot',
+                    category: r.category || 'Sabzavotlar',
+                    farmer: r.seller_name || r.farmer || 'Fermer',
+                    verified: Boolean(r.is_verified),
+                    region: r.region || '—',
+                    price: Number(r.price_per_kg ?? r.price) || 0,
+                    quantity: Number(r.available_qty ?? r.quantity) || 0,
+                    minOrder: Number(r.min_order) || 50,
+                    harvestDate: r.harvest_date || '',
+                    quality: r.quality || 'STANDARD',
+                    availability: r.availability || 'READY',
+                    image: r.image_url || r.image || '',
+                    phone: r.phone_number || '',
+                    rating: r.rating || null
+                }));
+            } catch (err) {
+                console.warn("Backenddan yuklab bo'lmadi:", err);
+            }
             renderProducts();
-        };
+            renderFarmerTable();
+        }
+
+        // ===== Ishga tushirish =====
+        if (new URLSearchParams(location.search).get('elon') === '1') {
+            setTimeout(() => showToast("E'loningiz bozorga joylashtirildi"), 300);
+            history.replaceState(null, '', '/');
+        }
+        setRole('BUYER');
+        paintChips();
+        renderProducts();
+        renderFarmerTable();
+        updateCartUI();
+        loadRemoteProducts();
     </script>
-    <script> API_URL = "http://127.0.0.1:8000/api";
-
-// Sotuvchilar joylagan e'lonlarni bazadan yuklab chiqarish
-async function loadProducts() {
-  try {
-    const response = await fetch(`${API_URL}/products/`);
-    const products = await response.json();
-    
-    const listElement = document.getElementById("productGrid");
-    if (!listElement) return;
-
-    listElement.innerHTML = ""; 
-
-    // Agar sotuvchilar hali e'lon joylamagan bo'lsa:
-    if (products.length === 0) {
-      listElement.innerHTML = `
-        <div class="col-span-full text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm">
-          <p class="text-slate-500 font-semibold text-lg">Hozircha hech qanday e'lon mavjud emas.</p>
-          <p class="text-slate-400 text-sm mt-1">Yuqoridagi "Hosil E'lon Qilish" yoki "Mahsulot Joylashtirish" tugmasi orqali birinchi e'lonni qoldiring!</p>
-        </div>
-      `;
-      return;
-    }
-
-    // Sotuvchilar qo'shgan har bir mahsulotni ekranga chiqarish
-    products.forEach(item => {
-      const imageUrl = item.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
-
-      listElement.innerHTML += `
-        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition duration-200 flex flex-col justify-between">
-          <div>
-            <!-- Mahsulot Rasmi va Kategoriyasi -->
-            <div class="relative h-44 w-full bg-slate-100">
-              <img src="${imageUrl}" alt="${item.title}" class="w-full h-full object-cover" />
-              <span class="absolute top-3 left-3 bg-emerald-600/90 backdrop-blur-md text-white text-xs font-bold px-2.5 py-1 rounded-lg">
-                ${item.category}
-              </span>
-            </div>
-
-            <!-- Mahsulot Ma'lumotlari -->
-            <div class="p-4">
-              <h3 class="font-bold text-slate-800 text-lg leading-snug">${item.title}</h3>
-              
-              <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
-                <div>
-                  <p class="text-xs text-slate-400 font-medium">Narxi</p>
-                  <p class="font-bold text-emerald-700 text-base">${item.price_per_kg} so'm/kg</p>
-                </div>
-                <div class="text-right">
-                  <p class="text-xs text-slate-400 font-medium">Mavjud hajmi</p>
-                  <p class="font-semibold text-slate-700 text-sm">${item.available_qty} kg</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Sotuvchi bilan bog'lanish (Telefon raqam) -->
-          <div class="p-4 pt-0">
-            <a href="tel:${item.phone_number}" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl text-center block transition text-sm shadow-sm">
-              📞 Bog'lanish: ${item.phone_number}
-            </a>
-          </div>
-        </div>
-      `;
-    });
-  } catch (error) {
-    console.error("E'lonlarni yuklashda xatolik:", error);
-  }
-}
-
-document.addEventListener("DOMContentLoaded", loadProducts);
-</script>
 </body>
 </html>
