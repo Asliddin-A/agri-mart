@@ -13,7 +13,11 @@
   <h1>Yangi e'lon joylashtirish</h1>
   <p class="sub">Sotadigan mahsulotingiz haqida ma'lumotlarni kiriting.</p>
 
-  <form class="card" id="elonForm" action="/elon-yuborish" method="post" enctype="multipart/form-data">
+  <div id="gate" class="card" style="display:none"><strong id="gateTitle"></strong><p id="gateText" class="sub" style="margin:0"></p><div id="gateLinks"></div></div>
+
+  <form class="card" id="elonForm" style="display:none" action="/elon-yuborish" method="post" enctype="multipart/form-data">
+    <p class="sub" id="sellerInfo" style="margin:0"></p>
+
     <label class="field"><span>Mahsulot nomi</span>
       <input type="text" name="title" maxlength="80" placeholder="Masalan: Samarqand qizil olmasi" required>
     </label>
@@ -41,10 +45,6 @@
       <div class="input-suffix"><input type="number" name="min_order" inputmode="numeric" min="10" step="10" placeholder="200" required><em>kg</em></div>
     </label>
 
-    <label class="field"><span>Telefon raqami</span>
-      <div class="input-prefix"><em>+998</em><input type="tel" name="phone" inputmode="numeric" placeholder="90 123 45 67" pattern="[0-9 ]{9,12}" required></div>
-    </label>
-
     <div class="field"><span>Mahsulot rasmi (ixtiyoriy)</span>
       <label class="drop">
         <input type="file" name="file-upload" id="fileInput" accept="image/png,image/jpeg" hidden>
@@ -68,6 +68,21 @@
     if (file && file.size > 5 * 1024 * 1024) { alert("Rasm 5 MB dan katta bo'lmasligi kerak"); f.value = ''; return; }
     document.getElementById('fileName').textContent = file ? file.name : 'Rasm yuklash';
   });
+  (async () => {
+    const show = (t, x, links) => {
+      document.getElementById('gateTitle').textContent = t;
+      document.getElementById('gateText').textContent = x;
+      document.getElementById('gateLinks').innerHTML = links;
+      document.getElementById('gate').style.display = 'grid';
+    };
+    let me = null;
+    try { me = (await (await fetch('/api/me')).json()).user; } catch (_) {}
+    const a = 'style="color:#15803d;font-weight:700;margin-right:16px"';
+    if (!me) return show("Avval tizimga kiring", "E'lon berish uchun sotuvchi sifatida ro'yxatdan o'tishingiz kerak.", `<a ${a} href="/?auth=register">Ro'yxatdan o'tish</a><a ${a} href="/?auth=login">Kirish</a>`);
+    if (me.role !== 'seller') return show("Sotuvchi hisobi kerak", "Sizning hisobingiz xaridor uchun. E'lon berish uchun sotuvchi hisobi ochishingiz kerak.", `<a ${a} href="/">Bosh sahifa</a>`);
+    document.getElementById('sellerInfo').textContent = `Sotuvchi: ${me.name} (@${me.telegram}, ${me.phone}) · ${me.verified ? 'tasdiqlangan' : 'tasdiqlanish kutilmoqda'}`;
+    document.getElementById('elonForm').style.display = 'grid';
+  })();
 </script>
 </body>
 </html>
