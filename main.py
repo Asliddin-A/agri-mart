@@ -1,179 +1,129 @@
-from flask import Flask, render_template, request, redirect, url_for
 import os
+import re
 import sqlite3
+import uuid
 
-app = Flask(__name__)
+from flask import Flask, abort, jsonify, redirect, request, send_from_directory
 
-# Yuklangan rasmlar saqlanadigan papka joyi
-UPLOAD_FOLDER = 'static/uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# DIQQAT: Vercelda /tmp vaqtinchalik. Ma'lumot saqlanib qolishi uchun haqiqiy bazaga o'tish kerak.
+DB_PATH = os.environ.get("DB_PATH", "/tmp/database.db")
+UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER", "/tmp/uploads")
+ALLOWED_EXT = {"png", "jpg", "jpeg"}
+CATEGORIES = {"Sabzavotlar", "Mevalar", "Poliz", "Ko'katlar"}
+REGIONS = {"Toshkent shahri", "Toshkent viloyati", "Andijon", "Buxoro", "Farg'ona", "Jizzax", "Namangan", "Navoiy", "Qashqadaryo", "Samarqand", "Sirdaryo", "Surxondaryo", "Xorazm", "Qoraqalpog'iston Respublikasi"}
+PAGES = {"elon.html", "chat.html", "Eloncss.css", "favicon.png"}
 
-# Vercel-da xatolik bermasligi uchun bazani /tmp papkasiga bog'laymiz
-DB_PATH = '/tmp/database.db'
+app = Flask(__name__, static_folder=None)
+app.config["MAX_CONTENT_LENGTH"] = 6 * 1024 * 1024
 
-# MA'LUMOTLAR BAZASINI SOZLASH (SQLite)
-def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS elonlar (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT,
-            category TEXT,
-            price TEXT,
-            phone TEXT,
-            description TEXT,
-            image TEXT
-        )
-    ''')
-    conn.commit()
-    conn.close()
 
-# Sayt yurganda bazani yaratib oladi
-init_db()
-
-# 1. BOSH SAHIFANI OCHISH
-@app.route('/')
-def home():
+def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM elonlar ORDER BY id DESC')
-    barcha_elonlar = cursor.fetchall()
-    conn.close()
-    return render_template('index.html', elonlar=barcha_elonlar)
+    return conn
 
-# 2. E'lon berish sahifasini ochish
-@app.route('/elon.html')
-def elon_page():
-    return render_template('elon.html')
 
-# 3. Chat sahifasini ochish
-@app.route('/chat.html')
-def chat_page():
-    return render_template('chat.html')
+def init_db():
+    with get_db() as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS products (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL, category TEXT NOT NULL, region TEXT NOT NULL,
+                price REAL NOT NULL, quantity REAL NOT NULL, min_order REAL NOT NULL,
+                phone TEXT NOT NULL, description TEXT, image TEXT,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )""")
 
-# 4. E'lon formasi yuborilganda ma'lumotlarni bazaga saqlash
-@app.route('/elon-yuborish', methods=['POST'])
+
+init_db()
+
+
+def serve(name):
+    # Fayl templates/ papkasida bo'lsa shu yerdan, bo'lmasa asosiy papkadan beriladi
+    for folder in (os.path.join(BASE_DIR, "templates"), BASE_DIR):
+        if os.path.isfile(os.path.join(folder, name)):
+            return send_from_directory(folder, name)
+    abort(404)
+
+
+@app.route("/")
+def home():
+    return serve("index.html")
+
+
+@app.route("/<path:name>")
+def pages(name):
+    if name not in PAGES:
+        abort(404)
+    return serve(name)
+
+
+@app.route("/uploads/<path:name>")
+def uploads(name):
+    return send_from_directory(UPLOAD_FOLDER, name)
+
+
+@app.route("/api/products/")
+def api_products():
+    with get_db() as conn:
+        rows = conn.execute("SELECT * FROM products ORDER BY id DESC").fetchall()
+    return jsonify([{
+        "id": r["id"], "title": r["title"], "category": r["category"], "region": r["region"],
+        "price_per_kg": r["price"], "available_qty": r["quantity"], "min_order": r["min_order"],
+        "phone_number": r["phone"], "image_url": r["image"] or "", "seller_name": "Fermer",
+        "harvest_date": "Yangi e'lon", "quality": "STANDARD", "availability": "READY",
+    } for r in rows])
+
+
+def bad(msg):
+    return f"Xato: {msg}. Orqaga qaytib tuzating.", 400
+
+
+@app.route("/elon-yuborish", methods=["POST"])
 def elon_yuborish():
-    if request.method == 'POST':
-        title = request.form.get('title')
-        category = request.form.get('category')
-        price = request.form.get('price')
-        phone = request.form.get('phone')
-        description = request.form.get('description')
-        
-        file = request.files.get('file-upload')
-        image_name = ""
-        
-        if file and file.filename != '':
-            # Vercel-da rasmlarni ham vaqtinchalik /tmp papkasiga yoki static ichiga yozishga urinib ko'ramiz
-            if not os.path.exists(UPLOAD_FOLDER):
-                try:
-                    os.makedirs(UPLOAD_FOLDER)
-                except:
-                    pass
-            try:
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
-                image_name = file.filename
-            except:
-                image_name = "" # Agar rasm saqlashda server ruxsat bermasa xato bermay o'tib ketadi
+    f = request.form
+    title = (f.get("title") or "").strip()
+    category, region = f.get("category"), f.get("region")
+    try:
+        price, quantity, min_order = (float(f.get(k)) for k in ("price", "quantity", "min_order"))
+    except (TypeError, ValueError):
+        return bad("narx, hajm va min. buyurtma raqam bo'lishi kerak")
 
-        # MA'LUMOTLARNI BAZAGA YOZISH
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO elonlar (title, category, price, phone, description, image)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (title, category, price, phone, description, image_name))
-        conn.commit()
-        conn.close()
+    digits = re.sub(r"\D", "", f.get("phone") or "")
+    if digits.startswith("998"):
+        digits = digits[3:]
+    if not title or len(title) > 80:
+        return bad("mahsulot nomi bo'sh yoki juda uzun")
+    if category not in CATEGORIES or region not in REGIONS:
+        return bad("kategoriya yoki viloyat noto'g'ri")
+    if price <= 0 or quantity <= 0 or min_order <= 0 or min_order > quantity:
+        return bad("narx, hajm yoki min. buyurtma noto'g'ri")
+    if len(digits) != 9:
+        return bad("telefon raqami 9 xonali bo'lishi kerak")
 
-        return redirect('/')
+    image_url = ""
+    file = request.files.get("file-upload")
+    if file and file.filename:
+        ext = file.filename.rsplit(".", 1)[-1].lower()
+        if ext not in ALLOWED_EXT:
+            return bad("rasm faqat PNG yoki JPG bo'lishi mumkin")
+        try:
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+            name = f"{uuid.uuid4().hex}.{ext}"
+            file.save(os.path.join(UPLOAD_FOLDER, name))
+            image_url = f"/uploads/{name}"
+        except OSError:
+            image_url = ""
 
-if __name__ == '__main__':
-    app.run(debug=True) 
-    * { box-sizing: border-box; margin: 0; }
+    with get_db() as conn:
+        conn.execute(
+            "INSERT INTO products (title, category, region, price, quantity, min_order, phone, description, image) "
+            "VALUES (?,?,?,?,?,?,?,?,?)",
+            (title, category, region, price, quantity, min_order, "+998" + digits,
+             (f.get("description") or "").strip()[:500], image_url))
+    return redirect("/?elon=1")
 
-body {
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  background: #f0fdf4;
-  color: #14532d;
-  line-height: 1.5;
-}
 
-.page { max-width: 560px; margin: 0 auto; padding: 24px 16px 32px; }
-
-h1 { font-size: 26px; font-weight: 800; line-height: 1.2; }
-.sub { margin: 6px 0 20px; color: #4b6b57; font-size: 15px; }
-
-.card {
-  background: #fff;
-  border-radius: 20px;
-  padding: 20px;
-  display: grid;
-  gap: 16px;
-  box-shadow: 0 8px 24px rgba(22, 101, 52, .08);
-}
-
-.field { display: grid; gap: 6px; }
-.field > span { font-size: 14px; font-weight: 600; }
-
-input[type="text"], input[type="number"], input[type="tel"], select, textarea {
-  width: 100%;
-  height: 46px;
-  padding: 0 14px;
-  font: inherit;
-  font-size: 16px; /* iOS'da zoom bo'lmasligi uchun */
-  color: inherit;
-  background: #fff;
-  border: 1.5px solid #bbf7d0;
-  border-radius: 12px;
-  outline: none;
-  transition: border-color .2s, box-shadow .2s;
-}
-textarea { height: auto; padding: 12px 14px; resize: vertical; }
-
-input:focus, select:focus, textarea:focus {
-  border-color: #16a34a;
-  box-shadow: 0 0 0 4px rgba(22, 163, 74, .15);
-}
-
-.input-suffix, .input-prefix { position: relative; display: flex; align-items: center; }
-.input-suffix em, .input-prefix em {
-  position: absolute; font-style: normal; font-weight: 600; color: #15803d;
-}
-.input-suffix em { right: 14px; }
-.input-suffix input { padding-right: 56px; }
-.input-prefix em { left: 14px; }
-.input-prefix input { padding-left: 62px; }
-
-.drop {
-  display: grid; justify-items: center; gap: 2px;
-  padding: 24px 16px;
-  text-align: center;
-  background: #f0fdf4;
-  border: 2px dashed #86efac;
-  border-radius: 16px;
-  cursor: pointer;
-  transition: background .2s, border-color .2s;
-}
-.drop:hover { background: #dcfce7; border-color: #16a34a; }
-.drop strong { color: #15803d; }
-.drop small { color: #6b8f78; font-size: 13px; }
-
-.submit {
-  height: 50px;
-  border: 0;
-  border-radius: 14px;
-  font: inherit;
-  font-size: 16px;
-  font-weight: 700;
-  color: #fff;
-  background: linear-gradient(135deg, #16a34a, #15803d);
-  box-shadow: 0 6px 16px rgba(22, 163, 74, .35);
-  cursor: pointer;
-}
-.submit:active { transform: scale(.98); }
-
-footer { margin-top: 24px; text-align: center; font-size: 13px; color: #6b8f78; }
+if __name__ == "__main__":
+    app.run(debug=True)
