@@ -6,9 +6,9 @@
     <title>Xabarlar va Jonli Chat - AgriEko</title>
     
     <!-- Tailwind CSS CDN -->
-    <script src="https://tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Ikonkalari -->
-    <link rel="stylesheet" href="https://cloudflare.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Maxsus CSS effektlari (Gradients va Scrollbar uchun) -->
     <style>
@@ -24,7 +24,7 @@
     <!-- 1. Yuqori Navigatsiya Paneli (Premium Header) -->
     <header class="bg-white border-b border-slate-200/80 backdrop-blur-md bg-white/90 sticky top-0 px-4 py-3.5 flex items-center justify-between shrink-0 z-50 shadow-sm">
         <div class="flex items-center space-x-3.5">
-            <a href="index.html" class="w-9 h-9 flex items-center justify-center text-slate-500 hover:text-green-600 hover:bg-slate-100 rounded-full transition duration-200">
+            <a href="/" class="w-9 h-9 flex items-center justify-center text-slate-500 hover:text-green-600 hover:bg-slate-100 rounded-full transition duration-200">
                 <i class="fa-solid fa-arrow-left text-lg"></i>
             </a>
             <div>
@@ -37,6 +37,7 @@
             <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span> B2B Maydonchasi
         </div>
     </header>
+    <div class="bg-amber-50 border-b border-amber-200 text-amber-900 text-xs px-4 py-2 text-center">Demo: bu suhbatlar namuna. Haqiqiy chat hali ulanmagan.</div>
 
     <!-- 2. Asosiy Chat Tuzilishi -->
     <div class="flex-1 flex overflow-hidden max-w-6xl w-full mx-auto bg-white md:my-4 md:rounded-2xl md:shadow-lg md:border md:border-slate-200/60">
@@ -149,6 +150,16 @@
                         <input type="text" placeholder="Xabaringizni yozing..." 
                             class="w-full pl-4 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition duration-200">
                         <!-- Smaylik belgisi -->
-                        <button type="button" class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 transition">
+                        <button type="button" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 transition">
                             <i class="fa-regular fa-face-smile text-base"></i>
                         </button>
+                    </div>
+                    <button type="submit" aria-label="Yuborish" class="w-10 h-10 shrink-0 flex items-center justify-center rounded-xl bg-green-600 hover:bg-green-700 text-white transition">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
