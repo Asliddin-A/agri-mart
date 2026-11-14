@@ -60,7 +60,7 @@
 <body class="min-h-screen flex flex-col font-sans text-slate-800 antialiased bg-slate-50">
 
     <!-- Yuqori tezkor havolalar -->
-    <div class="bg-white border-b border-slate-200">
+    <div class="relative z-40 bg-white border-b border-slate-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-2 sm:justify-end">
             <a href="chat.html" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-slate-100 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-slate-200 transition">
                 <i class="fa-regular fa-comment-dots text-agri-600"></i> Xabarlar
@@ -68,6 +68,12 @@
             <a href="elon.html" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-agri-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-agri-700 transition">
                 <i class="fa-solid fa-plus"></i> E'lon berish
             </a>
+            <div class="relative shrink-0">
+                <button id="menuBtn" type="button" aria-label="Menyu" aria-expanded="false" class="w-11 h-11 grid place-items-center rounded-xl text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-ellipsis-vertical text-lg"></i>
+                </button>
+                <div id="menuPanel" class="hidden absolute right-0 top-full mt-2 w-64 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl"></div>
+            </div>
         </div>
     </div>
 
@@ -291,6 +297,53 @@
         </section>
     </main>
 
+    <!-- MODAL: Kirish / Ro'yxatdan o'tish -->
+    <div id="authModal" data-modal class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+        <div tabindex="-1" class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[92dvh] outline-none">
+            <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-slate-100 shrink-0">
+                <h2 id="authTitle" class="text-lg font-bold text-slate-800">Kirish</h2>
+                <button id="closeAuthBtn" type="button" aria-label="Yopish" class="w-10 h-10 grid place-items-center text-slate-400 hover:text-slate-700 rounded-lg"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="grid grid-cols-2 gap-1 mx-5 mt-4 p-1 bg-slate-100 rounded-xl shrink-0">
+                <button type="button" data-tab="login" class="auth-tab rounded-lg py-2.5 text-sm font-semibold transition">Kirish</button>
+                <button type="button" data-tab="register" class="auth-tab rounded-lg py-2.5 text-sm font-semibold transition">Ro'yxatdan o'tish</button>
+            </div>
+            <form id="authForm" class="space-y-4 p-5 overflow-y-auto" autocomplete="on">
+                <div id="regFields" class="hidden space-y-4">
+                    <div>
+                        <label for="authName" class="block text-sm font-semibold text-slate-700 mb-1">Ism yoki xo'jalik nomi</label>
+                        <input id="authName" type="text" maxlength="40" autocomplete="name" class="w-full px-3.5 py-3 text-base sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-agri-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="authRole" class="block text-sm font-semibold text-slate-700 mb-1">Hisob turi</label>
+                        <select id="authRole" class="w-full px-3 py-3 text-base sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-agri-500 focus:outline-none">
+                            <option value="buyer">Xaridor (restoran, do'kon)</option>
+                            <option value="seller">Sotuvchi (fermer)</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label for="authPhone" class="block text-sm font-semibold text-slate-700 mb-1">Telefon raqami</label>
+                    <div class="flex items-center rounded-xl border border-slate-200 bg-slate-50 focus-within:ring-2 focus-within:ring-agri-500">
+                        <span class="pl-3.5 pr-2 text-sm font-semibold text-agri-700">+998</span>
+                        <input id="authPhone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="90 123 45 67" class="w-full bg-transparent py-3 pr-3.5 text-base sm:text-sm focus:outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label for="authPassword" class="block text-sm font-semibold text-slate-700 mb-1">Parol</label>
+                    <input id="authPassword" type="password" minlength="6" maxlength="72" autocomplete="current-password" class="w-full px-3.5 py-3 text-base sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-agri-500 focus:outline-none">
+                </div>
+                <div id="sellerFields" class="hidden">
+                    <label for="authTelegram" class="block text-sm font-semibold text-slate-700 mb-1">Telegram username</label>
+                    <input id="authTelegram" type="text" autocapitalize="none" placeholder="@ali_fermer" class="w-full px-3.5 py-3 text-base sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-agri-500 focus:outline-none">
+                    <p class="text-xs text-slate-500 mt-1">Xaridorlar sizga shu orqali yozadi. Sotuvchi hisobi tekshiruvdan keyin "tasdiqlangan" belgisini oladi.</p>
+                </div>
+                <p id="authError" class="hidden rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700" role="alert"></p>
+                <button id="authSubmit" type="submit" class="w-full py-3.5 bg-agri-600 hover:bg-agri-700 disabled:opacity-60 text-white font-bold text-sm rounded-xl shadow-md transition">Kirish</button>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL 2: Savat -->
     <div id="cartModal" data-modal class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true" aria-labelledby="cartModalTitle">
         <div tabindex="-1" class="bg-white w-full sm:max-w-xl rounded-t-3xl sm:rounded-2xl shadow-2xl border border-slate-100 flex flex-col max-h-[92dvh] outline-none">
@@ -331,12 +384,10 @@
 
                 <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 flex items-start gap-2">
                     <i class="fa-solid fa-lock text-amber-600 mt-0.5" aria-hidden="true"></i>
-                    <span>Escrow to'lov tizimi hali ulanmagan. Hozircha buyurtma fermerga so'rov sifatida yuboriladi, pul yechilmaydi.</span>
+                    <span>Buyurtma Telegram orqali fermer bilan kelishiladi. To'lov saytda yechilmaydi: narx, yetkazish va to'lovni fermer bilan to'g'ridan-to'g'ri kelishasiz.</span>
                 </div>
 
-                <button id="checkoutBtn" type="button" class="w-full py-3.5 bg-agri-600 hover:bg-agri-700 text-white font-bold text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-paper-plane"></i> Buyurtma so'rovini yuborish
-                </button>
+                <div id="checkoutLinks" class="space-y-2"></div>
             </div>
         </div>
     </div>
@@ -583,6 +634,37 @@
             updateCartUI();
         }
 
+
+        // ===== Telegram orqali buyurtma =====
+        function renderCheckoutLinks(logistics) {
+            const box = $('checkoutLinks');
+            if (cart.length === 0) { box.innerHTML = ''; return; }
+            const logLabel = $('logisticsTypeSelect').selectedOptions[0].textContent;
+            const groups = new Map();
+            cart.forEach(it => {
+                const p = it.product;
+                const key = p.telegram || p.phone || ('x' + p.id);
+                if (!groups.has(key)) groups.set(key, { farmer: p.farmer, telegram: p.telegram, phone: p.phone, items: [] });
+                groups.get(key).items.push(it);
+            });
+            box.innerHTML = [...groups.values()].map(g => {
+                const sum = g.items.reduce((s, i) => s + i.product.price * i.cartQty, 0);
+                const lines = g.items.map(i => `- ${i.product.name}: ${fmt(i.cartQty)} kg x ${fmt(i.product.price)} UZS = ${fmt(i.product.price * i.cartQty)} UZS`).join('\n');
+                const text = `Assalomu alaykum! AgriEko saytidan yozyapman. Buyurtma:\n${lines}\nJami: ${fmt(sum)} UZS\nYetkazish: ${logLabel}\nShartlarni kelishib olsak bo'ladimi?`;
+                const tgUser = String(g.telegram || '').replace(/[^A-Za-z0-9_]/g, '');
+                const digits = String(g.phone || '').replace(/\D/g, '');
+                const href = tgUser ? `https://t.me/${tgUser}?text=${encodeURIComponent(text)}`
+                           : digits ? `https://t.me/+${digits}` : '';
+                return href
+                    ? `<a href="${esc(href)}" target="_blank" rel="noopener" data-order class="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-600 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-sky-700"><i class="fa-brands fa-telegram text-lg"></i> Telegramda yozish: ${esc(g.farmer)}</a>`
+                    : `<p class="rounded-xl bg-slate-100 p-3 text-center text-xs text-slate-500">${esc(g.farmer)}: kontakt ko'rsatilmagan</p>`;
+            }).join('');
+        }
+
+        $('checkoutLinks').addEventListener('click', e => {
+            if (e.target.closest('[data-order]')) { orders.push({ createdAt: Date.now() }); updateStats(); }
+        });
+
         function updateCartUI() {
             const badge = $('cartCountBadge');
             const list = $('cartItemsList');
@@ -599,6 +681,7 @@
                 $('cartSubtotalText').textContent = '0 UZS';
                 $('logisticsCostText').textContent = '0 UZS';
                 $('cartTotalText').textContent = '0 UZS';
+                renderCheckoutLinks();
                 return;
             }
 
@@ -630,6 +713,7 @@
             $('cartSubtotalText').textContent = `${fmt(subtotal)} UZS`;
             $('logisticsCostText').textContent = `${fmt(logistics)} UZS`;
             $('cartTotalText').textContent = `${fmt(subtotal + logistics)} UZS`;
+            renderCheckoutLinks(logistics);
         }
 
         $('cartItemsList').addEventListener('click', e => {
@@ -637,18 +721,6 @@
             if (btn) changeQty(Number(btn.dataset.qty), Number(btn.dataset.delta));
         });
         $('logisticsTypeSelect').addEventListener('change', updateCartUI);
-
-        $('checkoutBtn').addEventListener('click', () => {
-            if (cart.length === 0) { showToast("Savatda mahsulot yo'q", 'error'); return; }
-            const subtotal = cart.reduce((s, i) => s + i.product.price * i.cartQty, 0);
-            const logistics = LOGISTICS_COST[$('logisticsTypeSelect').value] || 0;
-            orders.push({ items: cart.map(i => ({ id: i.product.id, qty: i.cartQty })), total: subtotal + logistics, createdAt: Date.now() });
-            cart = [];
-            updateCartUI();
-            updateStats();
-            closeModal($('cartModal'));
-            showToast("Buyurtma so'rovi qabul qilindi. To'lov tizimi hali ulanmagan.", 'info');
-        });
 
         // ===== Modallar =====
         function openModal(el) {
@@ -724,6 +796,7 @@
                     availability: r.availability || 'READY',
                     image: r.image_url || r.image || '',
                     phone: r.phone_number || '',
+                    telegram: r.telegram || '',
                     rating: r.rating || null
                 }));
             } catch (err) {
@@ -733,12 +806,127 @@
             renderFarmerTable();
         }
 
+
+        // ===== Hisob: kirish, ro'yxatdan o'tish, menyu =====
+        let me = null;
+        let authMode = 'login';
+
+        async function postJSON(url, body) {
+            const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+            const d = await r.json().catch(() => ({}));
+            if (!r.ok) throw new Error(d.error || 'Xatolik yuz berdi');
+            return d;
+        }
+
+        const MENU_ITEM = 'flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-slate-700 hover:bg-slate-50 transition';
+        function renderMenu() {
+            const panel = $('menuPanel');
+            if (!me) {
+                panel.innerHTML = `
+                    <button type="button" data-menu="login" class="${MENU_ITEM}"><i class="fa-solid fa-right-to-bracket w-4 text-agri-600"></i> Kirish</button>
+                    <button type="button" data-menu="register" class="${MENU_ITEM} border-t border-slate-100"><i class="fa-solid fa-user-plus w-4 text-agri-600"></i> Ro'yxatdan o'tish</button>`;
+                return;
+            }
+            const status = me.role === 'seller'
+                ? (me.verified ? '<span class="text-emerald-700"><i class="fa-solid fa-circle-check"></i> Tasdiqlangan sotuvchi</span>'
+                               : '<span class="text-amber-700"><i class="fa-regular fa-clock"></i> Tasdiqlanish kutilmoqda</span>')
+                : '<span class="text-slate-500">Xaridor</span>';
+            panel.innerHTML = `
+                <div class="bg-slate-50 px-4 py-3 border-b border-slate-100">
+                    <p class="truncate text-sm font-bold text-slate-800">${esc(me.name)}</p>
+                    <p class="text-xs mt-0.5">${status}</p>
+                </div>
+                ${me.role === 'seller' ? `<a href="/elon.html" class="${MENU_ITEM}"><i class="fa-solid fa-plus w-4 text-agri-600"></i> E'lon berish</a>` : ''}
+                <button type="button" data-menu="logout" class="${MENU_ITEM} ${me.role === 'seller' ? 'border-t border-slate-100' : ''}"><i class="fa-solid fa-right-from-bracket w-4 text-slate-400"></i> Chiqish</button>`;
+        }
+
+        async function loadMe() {
+            try { me = (await (await fetch('/api/me')).json()).user; } catch (_) { me = null; }
+            renderMenu();
+        }
+
+        function setAuthMode(mode) {
+            authMode = mode;
+            const reg = mode === 'register';
+            $('authTitle').textContent = reg ? "Ro'yxatdan o'tish" : 'Kirish';
+            $('authSubmit').textContent = reg ? "Ro'yxatdan o'tish" : 'Kirish';
+            $('regFields').classList.toggle('hidden', !reg);
+            $('sellerFields').classList.toggle('hidden', !(reg && $('authRole').value === 'seller'));
+            $('authPassword').autocomplete = reg ? 'new-password' : 'current-password';
+            document.querySelectorAll('.auth-tab').forEach(t => {
+                const on = t.dataset.tab === mode;
+                t.className = 'auth-tab rounded-lg py-2.5 text-sm font-semibold transition ' + (on ? 'bg-white text-agri-800 shadow-sm' : 'text-slate-500 hover:text-slate-800');
+            });
+            $('authError').classList.add('hidden');
+        }
+        function openAuth(mode) { setAuthMode(mode); openModal($('authModal')); }
+
+        document.querySelectorAll('.auth-tab').forEach(t => t.addEventListener('click', () => setAuthMode(t.dataset.tab)));
+        $('authRole').addEventListener('change', () => setAuthMode('register'));
+        $('closeAuthBtn').addEventListener('click', () => closeModal($('authModal')));
+
+        $('authForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            const btn = $('authSubmit');
+            btn.disabled = true;
+            $('authError').classList.add('hidden');
+            const body = { phone: $('authPhone').value, password: $('authPassword').value };
+            if (authMode === 'register') {
+                body.name = $('authName').value;
+                body.role = $('authRole').value;
+                body.telegram = $('authTelegram').value;
+            }
+            try {
+                const d = await postJSON(authMode === 'register' ? '/api/register' : '/api/login', body);
+                me = d.user;
+                renderMenu();
+                closeModal($('authModal'));
+                $('authForm').reset();
+                showToast(authMode === 'register' ? "Ro'yxatdan o'tdingiz" : `Xush kelibsiz, ${me.name}`);
+            } catch (err) {
+                $('authError').textContent = err.message;
+                $('authError').classList.remove('hidden');
+            } finally { btn.disabled = false; }
+        });
+
+        // Menyu ochish/yopish
+        function toggleMenu(open) {
+            $('menuPanel').classList.toggle('hidden', !open);
+            $('menuBtn').setAttribute('aria-expanded', String(open));
+        }
+        $('menuBtn').addEventListener('click', e => { e.stopPropagation(); toggleMenu($('menuPanel').classList.contains('hidden')); });
+        document.addEventListener('click', e => { if (!e.target.closest('#menuPanel')) toggleMenu(false); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') toggleMenu(false); });
+        $('menuPanel').addEventListener('click', async e => {
+            const b = e.target.closest('[data-menu]');
+            if (!b) return;
+            toggleMenu(false);
+            if (b.dataset.menu === 'logout') {
+                await postJSON('/api/logout').catch(() => {});
+                me = null; renderMenu(); showToast('Tizimdan chiqdingiz', 'info');
+            } else openAuth(b.dataset.menu);
+        });
+
+        // "E'lon berish" havolalari faqat sotuvchiga ochiq
+        document.addEventListener('click', e => {
+            const a = e.target.closest('a[href="/elon.html"]');
+            if (!a || (me && me.role === 'seller')) return;
+            e.preventDefault();
+            if (!me) { openAuth('register'); showToast("E'lon berish uchun sotuvchi sifatida ro'yxatdan o'ting", 'info'); }
+            else showToast("E'lon berish uchun sotuvchi hisobi kerak", 'error');
+        });
+
         // ===== Ishga tushirish =====
         if (new URLSearchParams(location.search).get('elon') === '1') {
             setTimeout(() => showToast("E'loningiz bozorga joylashtirildi"), 300);
             history.replaceState(null, '', '/');
         }
         setRole('BUYER');
+        loadMe().then(() => {
+            const q = new URLSearchParams(location.search).get('auth');
+            if ((q === 'login' || q === 'register') && !me) openAuth(q);
+            if (q) history.replaceState(null, '', '/');
+        });
         paintChips();
         renderProducts();
         renderFarmerTable();
