@@ -1,71 +1,73 @@
 <!DOCTYPE html>
-<html lang="uz" class="h-full bg-slate-50">
+<html lang="uz">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yangi e'lon qo'shish - AgriEko</title>
-    <link rel="stylesheet" href="/Eloncss.css">
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://tailwindcss.com"></script>
-    <!-- FontAwesome ikonkalari uchun (orqaga qaytish tugmasi va boshqalar uchun) -->
-    <link rel="stylesheet" href="https://cloudflare.com">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Yangi e'lon qo'shish | AgriEko</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="stylesheet" href="/Eloncss.css">
 </head>
-<body class="h-full font-sans antialiased text-slate-800">
-     <main class="page">
+<body>
+<main class="page">
+  <a href="/" style="display:inline-block;margin-bottom:12px;color:#15803d;font-weight:600;text-decoration:none">&larr; Bosh sahifa</a>
   <h1>Yangi e'lon joylashtirish</h1>
   <p class="sub">Sotadigan mahsulotingiz haqida ma'lumotlarni kiriting.</p>
 
-  <form class="card" id="elonForm">
-    <label class="field">
-      <span>Mahsulot yoki e'lon nomi</span>
-      <input type="text" placeholder="Masalan: Sarhil qizil olma" required>
+  <form class="card" id="elonForm" action="/elon-yuborish" method="post" enctype="multipart/form-data">
+    <label class="field"><span>Mahsulot nomi</span>
+      <input type="text" name="title" maxlength="80" placeholder="Masalan: Samarqand qizil olmasi" required>
     </label>
 
-    <label class="field">
-      <span>Kategoriya</span>
-      <select required>
+    <label class="field"><span>Kategoriya</span>
+      <select name="category" required>
         <option value="">Kategoriyani tanlang</option>
-        <option value="">Mevalr</option>
-        <option value="">Sabzavotlar</option>
-        <option value="">Don va don mahsulotlari</option>
-        <option value="">Qishloq xõjalik yexnikasi</option>
+        <option>Sabzavotlar</option><option>Mevalar</option><option>Poliz</option><option>Ko'katlar</option>
       </select>
     </label>
 
-    <label class="field">
-      <span>Narxi (so'mda)</span>
-      <div class="input-suffix">
-        <input type="number" placeholder="0" min="0" required>
-        <em>UZS</em>
-      </div>
+    <label class="field"><span>Viloyat</span>
+      <select name="region" required><option value="">Viloyatni tanlang</option><option value="Toshkent shahri">Toshkent shahri</option><option value="Toshkent viloyati">Toshkent viloyati</option><option value="Andijon">Andijon</option><option value="Buxoro">Buxoro</option><option value="Farg'ona">Farg'ona</option><option value="Jizzax">Jizzax</option><option value="Namangan">Namangan</option><option value="Navoiy">Navoiy</option><option value="Qashqadaryo">Qashqadaryo</option><option value="Samarqand">Samarqand</option><option value="Sirdaryo">Sirdaryo</option><option value="Surxondaryo">Surxondaryo</option><option value="Xorazm">Xorazm</option><option value="Qoraqalpog'iston Respublikasi">Qoraqalpog'iston Respublikasi</option></select>
     </label>
 
-    <label class="field">
-      <span>Sotuvchi telefon raqami</span>
-      <div class="input-prefix">
-        <em>+998</em>
-        <input type="tel" placeholder="90 123 45 67" required>
-      </div>
+    <label class="field"><span>Narxi (1 kg)</span>
+      <div class="input-suffix"><input type="number" name="price" inputmode="numeric" min="100" step="100" placeholder="4500" required><em>UZS</em></div>
     </label>
 
-    <div class="field">
-      <span>Mahsulot rasmi</span>
+    <label class="field"><span>Umumiy hajm</span>
+      <div class="input-suffix"><input type="number" name="quantity" inputmode="numeric" min="50" step="50" placeholder="5000" required><em>kg</em></div>
+    </label>
+
+    <label class="field"><span>Minimal buyurtma</span>
+      <div class="input-suffix"><input type="number" name="min_order" inputmode="numeric" min="10" step="10" placeholder="200" required><em>kg</em></div>
+    </label>
+
+    <label class="field"><span>Telefon raqami</span>
+      <div class="input-prefix"><em>+998</em><input type="tel" name="phone" inputmode="numeric" placeholder="90 123 45 67" pattern="[0-9 ]{9,12}" required></div>
+    </label>
+
+    <div class="field"><span>Mahsulot rasmi (ixtiyoriy)</span>
       <label class="drop">
-        <input type="file" accept="image/png,image/jpeg" hidden>
-        <strong>Rasm yuklash</strong>
-        <small>yoki shu yerga tashlang</small>
-        <small>PNG, JPG, JPEG (maksimal 5MB)</small>
+        <input type="file" name="file-upload" id="fileInput" accept="image/png,image/jpeg" hidden>
+        <strong id="fileName">Rasm yuklash</strong>
+        <small>PNG yoki JPG, 5 MB gacha</small>
       </label>
     </div>
 
-    <label class="field">
-      <span>Mahsulot haqida qo'shimcha ma'lumot</span>
-      <textarea rows="4" placeholder="Mahsulot holati, hajmi yoki yetkazib berish shartlari"></textarea>
+    <label class="field"><span>Qo'shimcha ma'lumot</span>
+      <textarea name="description" rows="4" maxlength="500" placeholder="Holati, yetkazib berish shartlari"></textarea>
     </label>
 
     <button type="submit" class="submit">E'lonni joylashtirish</button>
   </form>
-
-  <footer>© 2026 AgriEko. Barcha huquqlar himoyalangan.</footer>
-     </main>
+  <footer>&copy; 2026 AgriEko</footer>
+</main>
+<script>
+  const f = document.getElementById('fileInput');
+  f.addEventListener('change', () => {
+    const file = f.files[0];
+    if (file && file.size > 5 * 1024 * 1024) { alert("Rasm 5 MB dan katta bo'lmasligi kerak"); f.value = ''; return; }
+    document.getElementById('fileName').textContent = file ? file.name : 'Rasm yuklash';
+  });
+</script>
+</body>
+</html>
