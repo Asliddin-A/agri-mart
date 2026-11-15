@@ -13,7 +13,11 @@
     <meta property="og:title" content="AgriEko | Fermerdan to'g'ridan-to'g'ri xarid">
     <meta property="og:description" content="Vositachisiz va shaffof narxlarda fermer mahsulotlari.">
 
-    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icon-192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="AgriEko">
+    <link rel="icon" type="image/png" href="/icon-192.png">
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -48,6 +52,7 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .glass-header { background: rgba(20, 83, 45, 0.97); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
         #marketplaceSection { scroll-margin-top: 8rem; }
+        .modal-panel { max-height: 92vh; max-height: 92dvh; } /* eski brauzerlar uchun vh zaxirasi */
         .no-scrollbar { scrollbar-width: none; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         :focus-visible { outline: 2px solid #22c55e; outline-offset: 2px; }
@@ -299,7 +304,7 @@
 
     <!-- MODAL: Kirish / Ro'yxatdan o'tish -->
     <div id="authModal" data-modal class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-        <div tabindex="-1" class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[92dvh] outline-none">
+        <div tabindex="-1" class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col modal-panel outline-none">
             <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-slate-100 shrink-0">
                 <h2 id="authTitle" class="text-lg font-bold text-slate-800">Kirish</h2>
                 <button id="closeAuthBtn" type="button" aria-label="Yopish" class="w-10 h-10 grid place-items-center text-slate-400 hover:text-slate-700 rounded-lg"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -346,7 +351,7 @@
 
     <!-- MODAL 2: Savat -->
     <div id="cartModal" data-modal class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true" aria-labelledby="cartModalTitle">
-        <div tabindex="-1" class="bg-white w-full sm:max-w-xl rounded-t-3xl sm:rounded-2xl shadow-2xl border border-slate-100 flex flex-col max-h-[92dvh] outline-none">
+        <div tabindex="-1" class="bg-white w-full sm:max-w-xl rounded-t-3xl sm:rounded-2xl shadow-2xl border border-slate-100 flex flex-col modal-panel outline-none">
             <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-slate-100 shrink-0">
                 <h2 id="cartModalTitle" class="text-lg font-bold text-slate-800 flex items-center gap-2">
                     <i class="fa-solid fa-cart-flatbed text-agri-600"></i> Ulgurji buyurtma
@@ -811,6 +816,21 @@
         let me = null;
         let authMode = 'login';
 
+        // Ilovani o'rnatish (Chrome/Android)
+        let installPrompt = null;
+        window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPrompt = e; renderMenu(); });
+        window.addEventListener('appinstalled', () => { installPrompt = null; renderMenu(); showToast("Ilova o'rnatildi"); });
+        function installItem() {
+            return installPrompt ? `<button type="button" data-menu="install" class="${MENU_ITEM} border-t border-slate-100"><i class="fa-solid fa-mobile-screen-button w-4 text-agri-600"></i> Ilovani o'rnatish</button>` : '';
+        }
+        async function installApp() {
+            if (!installPrompt) return;
+            installPrompt.prompt();
+            await installPrompt.userChoice.catch(() => {});
+            installPrompt = null;
+            renderMenu();
+        }
+
         async function postJSON(url, body) {
             const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
             const d = await r.json().catch(() => ({}));
@@ -824,7 +844,7 @@
             if (!me) {
                 panel.innerHTML = `
                     <button type="button" data-menu="login" class="${MENU_ITEM}"><i class="fa-solid fa-right-to-bracket w-4 text-agri-600"></i> Kirish</button>
-                    <button type="button" data-menu="register" class="${MENU_ITEM} border-t border-slate-100"><i class="fa-solid fa-user-plus w-4 text-agri-600"></i> Ro'yxatdan o'tish</button>`;
+                    <button type="button" data-menu="register" class="${MENU_ITEM} border-t border-slate-100"><i class="fa-solid fa-user-plus w-4 text-agri-600"></i> Ro'yxatdan o'tish</button>${installItem()}`;
                 return;
             }
             const status = me.role === 'seller'
@@ -837,7 +857,7 @@
                     <p class="text-xs mt-0.5">${status}</p>
                 </div>
                 ${me.role === 'seller' ? `<a href="/elon.html" class="${MENU_ITEM}"><i class="fa-solid fa-plus w-4 text-agri-600"></i> E'lon berish</a>` : ''}
-                <button type="button" data-menu="logout" class="${MENU_ITEM} ${me.role === 'seller' ? 'border-t border-slate-100' : ''}"><i class="fa-solid fa-right-from-bracket w-4 text-slate-400"></i> Chiqish</button>`;
+                <button type="button" data-menu="logout" class="${MENU_ITEM} ${me.role === 'seller' ? 'border-t border-slate-100' : ''}"><i class="fa-solid fa-right-from-bracket w-4 text-slate-400"></i> Chiqish</button>${installItem()}`;
         }
 
         async function loadMe() {
@@ -904,7 +924,8 @@
             if (b.dataset.menu === 'logout') {
                 await postJSON('/api/logout').catch(() => {});
                 me = null; renderMenu(); showToast('Tizimdan chiqdingiz', 'info');
-            } else openAuth(b.dataset.menu);
+            } else if (b.dataset.menu === 'install') installApp();
+            else openAuth(b.dataset.menu);
         });
 
         // "E'lon berish" havolalari faqat sotuvchiga ochiq
@@ -932,6 +953,11 @@
         renderFarmerTable();
         updateCartUI();
         loadRemoteProducts();
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+        }
     </script>
 </body>
 </html>
