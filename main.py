@@ -15,7 +15,7 @@ ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "")
 ALLOWED_EXT = {"png", "jpg", "jpeg"}
 CATEGORIES = {"Sabzavotlar", "Mevalar", "Poliz", "Ko'katlar"}
 REGIONS = {"Toshkent shahri", "Toshkent viloyati", "Andijon", "Buxoro", "Farg'ona", "Jizzax", "Namangan", "Navoiy", "Qashqadaryo", "Samarqand", "Sirdaryo", "Surxondaryo", "Xorazm", "Qoraqalpog'iston Respublikasi"}
-PAGES = {"elon.html", "chat.html", "Eloncss.css", "favicon.png", "manifest.json", "sw.js", "icon-192.png", "icon-512.png"}
+PAGES = {"elon.html", "chat.html", "Eloncss.css", "favicon.png", "manifest.json", "sw.js", "icon-192.png", "icon-512.png", "apple-touch-icon.png"}
 
 app = Flask(__name__, static_folder=None)
 app.config["MAX_CONTENT_LENGTH"] = 6 * 1024 * 1024
@@ -240,4 +240,3 @@ def elon_yuborish():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
