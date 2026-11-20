@@ -7,6 +7,7 @@ import sqlite3
 import urllib.error
 import urllib.request
 import uuid
+from datetime import datetime, timedelta, timezone
 from contextlib import contextmanager
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
@@ -28,6 +29,8 @@ SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABAS
 BUCKET = os.environ.get("STORAGE_BUCKET", "rasmlar")
 ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "")
 USE_PG = bool(DATABASE_URL)
+CONTACT_INFO = os.environ.get("CONTACT_INFO", "")   # masalan: @username, +998 90 123 45 67
+TERMS_VERSION = "2026-11-20"
 DB_PATH = os.environ.get("DB_PATH", "/tmp/database.db")      # faqat DATABASE_URL yo'q bo'lsa (lokal)
 UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER", "/tmp/uploads")  # faqat Supabase Storage yo'q bo'lsa (lokal)
 
@@ -45,6 +48,17 @@ if not _secret:
 app.secret_key = _secret
 app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax",
                   SESSION_COOKIE_SECURE=bool(os.environ.get("VERCEL")))
+
+# Google'da chiqmasligi uchun. Sayt tayyor bo'lganda shu bloknigina (3 qator) o'chiring.
+HIDE_FROM_SEARCH = True
+
+
+@app.after_request
+def no_index(resp):
+    if HIDE_FROM_SEARCH:
+        resp.headers["X-Robots-Tag"] = "noindex, nofollow, noarchive"
+    return resp
+
 
 # ---------------------------------------------------------------- Baza
 SCHEMA_PG = [
@@ -67,6 +81,12 @@ SCHEMA_PG = [
         subtotal DOUBLE PRECISION NOT NULL, logistics_type TEXT NOT NULL, logistics_cost DOUBLE PRECISION NOT NULL,
         total DOUBLE PRECISION NOT NULL, status TEXT NOT NULL DEFAULT 'new', created_at TIMESTAMPTZ DEFAULT now())""",
     "ALTER TABLE orders ENABLE ROW LEVEL SECURITY",
+    "ALTER TABLE orders ADD COLUMN IF NOT EXISTS buyer_confirmed_at TIMESTAMPTZ",
+    "ALTER TABLE orders ADD COLUMN IF NOT EXISTS seller_confirmed_at TIMESTAMPTZ",
+    "ALTER TABLE orders ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ",
+    "ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancelled_at TIMESTAMPTZ",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS terms_accepted_at TIMESTAMPTZ",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS terms_version TEXT",
 ]
 SCHEMA_SQLITE = [
     """CREATE TABLE IF NOT EXISTS users (
@@ -118,6 +138,17 @@ def ensure_schema():
         cur = conn.cursor()
         for stmt in (SCHEMA_PG if USE_PG else SCHEMA_SQLITE):
             cur.execute(stmt)
+        if not USE_PG:
+            for col in ("buyer_confirmed_at", "seller_confirmed_at", "completed_at", "cancelled_at"):
+                try:
+                    cur.execute(f"ALTER TABLE orders ADD COLUMN {col} TEXT")
+                except sqlite3.OperationalError:
+                    pass
+            for col in ("terms_accepted_at", "terms_version"):
+                try:
+                    cur.execute(f"ALTER TABLE users ADD COLUMN {col} TEXT")
+                except sqlite3.OperationalError:
+                    pass
         conn.commit()
     finally:
         conn.close()
@@ -258,6 +289,8 @@ def api_register():
     phone, role = norm_phone(d.get("phone")), d.get("role")
     password = d.get("password") or ""
     tg = norm_tg(d.get("telegram")) if role == "seller" else ""
+    if d.get("agree") is not True:
+        return err("Davom etish uchun foydalanuvchi shartlari va maxfiylik siyosatiga rozilik bering")
     if not (2 <= len(name) <= 40):
         return err("Ism 2 dan 40 gacha belgi bo'lsin")
     if not phone:
@@ -270,8 +303,9 @@ def api_register():
         return err("Telegram username noto'g'ri (masalan: @ali_fermer)")
     try:
         with db() as conn:
-            uid = run(conn, "INSERT INTO users (name, phone, password_hash, role, telegram) VALUES (?,?,?,?,?) RETURNING id",
-                      (name, phone, generate_password_hash(password), role, tg)).fetchone()["id"]
+            uid = run(conn, "INSERT INTO users (name, phone, password_hash, role, telegram, terms_accepted_at, terms_version) "
+                      "VALUES (?,?,?,?,?,?,?) RETURNING id",
+                      (name, phone, generate_password_hash(password), role, tg, now_ts(), TERMS_VERSION)).fetchone()["id"]
     except INTEGRITY_ERRORS:
         return err("Bu raqam allaqachon ro'yxatdan o'tgan. Kirishni bosing", 409)
     session["uid"] = uid
@@ -454,56 +488,151 @@ def load_order(conn, oid):
                         WHERE o.id=?""", (oid,)).fetchone()
 
 
+def fmt_dt(v):
+    """Vaqtni Toshkent vaqtida (UTC+5) ko'rsatadi."""
+    if not v:
+        return ""
+    try:
+        d = v if isinstance(v, datetime) else datetime.fromisoformat(str(v))
+    except ValueError:
+        return str(v)[:16]
+    if d.tzinfo is None:
+        d = d.replace(tzinfo=timezone.utc)
+    return d.astimezone(timezone(timedelta(hours=5))).strftime("%Y-%m-%d %H:%M")
+
+
+def now_ts():
+    n = datetime.now(timezone.utc)
+    return n if USE_PG else n.strftime("%Y-%m-%d %H:%M:%S")
+
+
+STATUS_LABEL = {"new": "Tasdiq kutilmoqda", "completed": "Savdo yakunlandi", "cancelled": "Bekor qilingan"}
+
+
+@app.route("/api/orders/<int:oid>/confirm", methods=["POST"])
+def api_order_confirm(oid):
+    """Har ikki tomon (xaridor va sotuvchi) savdo amalga oshganini alohida tasdiqlaydi. Ikkalasi tasdiqlasa, shartnoma tuziladi."""
+    u = current_user()
+    if not u:
+        return err("Avval tizimga kiring", 401)
+    with db() as conn:
+        o = run(conn, "SELECT * FROM orders WHERE id=?", (oid,)).fetchone()
+        if not o:
+            return err("Buyurtma topilmadi", 404)
+        if u["id"] == o["buyer_id"]:
+            col = "buyer_confirmed_at"
+        elif u["id"] == o["seller_id"]:
+            col = "seller_confirmed_at"
+        else:
+            return err("Bu buyurtma sizga tegishli emas", 403)
+        if o["status"] != "new":
+            return err("Bu buyurtma allaqachon yakunlangan yoki bekor qilingan")
+        if o[col]:
+            return err("Siz allaqachon tasdiqlagansiz, ikkinchi tomon kutilmoqda")
+        ts = now_ts()
+        run(conn, f"UPDATE orders SET {col}=? WHERE id=? AND {col} IS NULL AND status='new'", (ts, oid))
+        done = run(conn, "UPDATE orders SET status='completed', completed_at=? WHERE id=? AND status='new' "
+                         "AND buyer_confirmed_at IS NOT NULL AND seller_confirmed_at IS NOT NULL", (ts, oid)).rowcount == 1
+        if done:  # sotilgan hajm e'londagi zahiradan ayriladi
+            for l in json.loads(o["items"]):
+                run(conn, "UPDATE products SET quantity = CASE WHEN quantity > ? THEN quantity - ? ELSE 0 END WHERE id=?",
+                    (l["qty"], l["qty"], l["id"]))
+    return jsonify({"ok": True, "completed": done})
+
+
+@app.route("/api/orders/<int:oid>/cancel", methods=["POST"])
+def api_order_cancel(oid):
+    u = current_user()
+    if not u:
+        return err("Avval tizimga kiring", 401)
+    with db() as conn:
+        n = run(conn, "UPDATE orders SET status='cancelled', cancelled_at=? WHERE id=? AND status='new' "
+                      "AND (buyer_id=? OR seller_id=?)", (now_ts(), oid, u["id"], u["id"])).rowcount
+    if n != 1:
+        return err("Buyurtmani bekor qilib bo'lmaydi (yakunlangan, bekor qilingan yoki sizga tegishli emas)")
+    return jsonify({"ok": True})
+
+
 SHEET_CSS = """
 *{box-sizing:border-box}body{margin:0;background:#f1f5f9;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#0f172a;line-height:1.5}
 .sheet{max-width:760px;margin:0 auto;background:#fff;padding:24px 20px 32px}
 h1{margin:0;font-size:24px;color:#166534}.muted{color:#64748b;font-size:13px}
 .top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:3px solid #16a34a;padding-bottom:12px}
 .num{text-align:right;font-weight:800;font-size:20px}.num small{font-weight:400;color:#64748b;font-size:13px}
-.parties{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
-.parties div{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px;font-size:14px;word-break:break-word}
+.badge{display:inline-block;margin-top:12px;padding:4px 12px;border-radius:999px;font-size:13px;font-weight:700;background:#fef3c7;color:#92400e}
+.badge.completed{background:#dcfce7;color:#166534}.badge.cancelled{background:#fee2e2;color:#991b1b}
+.parties,.sigs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.parties div,.sigs div{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px;font-size:14px;word-break:break-word}
+.sigs div.ok{background:#f0fdf4;border-color:#86efac}
 .parties h3{margin:0 0 4px;font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:.04em}
 .tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px;min-width:420px}
 th,td{padding:8px;border-bottom:1px solid #e2e8f0;text-align:left}th{background:#f8fafc;font-size:12px;color:#475569}
-td.r,th.r{text-align:right;white-space:nowrap}.tot{margin:12px 0 0 auto;max-width:320px;font-size:14px}
-.tot div{display:flex;justify-content:space-between;padding:4px 0}.tot .g{border-top:2px solid #0f172a;margin-top:4px;padding-top:8px;font-weight:800;font-size:17px}
+td.r,th.r{text-align:right;white-space:nowrap}.tot{margin:12px 0 0 auto;max-width:340px;font-size:14px}
+.tot div{display:flex;justify-content:space-between;gap:12px;padding:4px 0}.tot .g{border-top:2px solid #0f172a;margin-top:4px;padding-top:8px;font-weight:800;font-size:17px}
 .note{margin-top:20px;font-size:12px;color:#475569;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.warn{font-size:13px;color:#92400e;margin:14px 0 6px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .btn{display:inline-block;border:0;border-radius:10px;padding:12px 18px;font-size:15px;font-weight:700;background:#16a34a;color:#fff;text-decoration:none;cursor:pointer}
-.btn.alt{background:#e2e8f0;color:#0f172a}
-@media(max-width:520px){.parties{grid-template-columns:1fr}}
+.btn.alt{background:#e2e8f0;color:#0f172a}.btn.red{background:#fee2e2;color:#991b1b}
+.sum{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.sum div{background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:12px;font-size:14px}
+@media(max-width:520px){.parties,.sigs,.sum{grid-template-columns:1fr}}
 @media print{body{background:#fff}.no-print{display:none!important}.sheet{padding:0;max-width:none}}
 """
 
 SHEET_HTML = """<!doctype html><html lang="uz"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
-<title>Buyurtma {{ number }} | AgriEko</title><style>""" + SHEET_CSS + """</style></head><body><main class="sheet">
-<div class="top"><div><h1>AgriEko</h1><div class="muted">Buyurtma varaqasi</div></div>
-<div class="num">{{ number }}<br><small>{{ date }}</small></div></div>
+<title>{{ title }} {{ number }} | AgriEko</title><style>""" + SHEET_CSS + """</style></head><body><main class="sheet">
+<div class="top"><div><h1>AgriEko</h1><div class="muted">{{ title }}</div></div>
+<div class="num">{{ number }}<br><small>{{ date }} (UTC+5)</small></div></div>
+<span class="badge {{ status }}">{{ status_label }}</span>
 <div class="parties">
 <div><h3>Xaridor</h3><b>{{ bname }}</b><br>{{ bphone }}</div>
 <div><h3>Sotuvchi</h3><b>{{ sname }}</b><br>{{ sphone }}{% if stg %}<br>@{{ stg }}{% endif %}</div></div>
 <div class="tw"><table><thead><tr><th>Mahsulot</th><th class="r">Miqdor</th><th class="r">Narx (1 kg)</th><th class="r">Summa</th></tr></thead><tbody>
 {% for l in lines %}<tr><td>{{ l.title }}</td><td class="r">{{ l.qty }} kg</td><td class="r">{{ l.price }}</td><td class="r">{{ l.sum }}</td></tr>{% endfor %}
 </tbody></table></div>
-<div class="tot"><div><span>Mahsulotlar</span><span>{{ subtotal }} UZS</span></div>
+<div class="tot"><div><span>Jami miqdor</span><span>{{ total_kg }} kg ({{ total_t }} t)</span></div>
+<div><span>Mahsulotlar</span><span>{{ subtotal }} UZS</span></div>
 <div><span>Logistika: {{ lname }}</span><span>{{ lcost }} UZS</span></div>
 <div class="g"><span>Jami</span><span>{{ total }} UZS</span></div></div>
-<p class="note">Bu hujjat buyurtma qabul qilinganini va yuqoridagi tarkibni tasdiqlaydi. To'lov AgriEko saytida amalga oshirilmaydi:
-to'lov va yetkazib berish shartlari xaridor va sotuvchi o'rtasida kelishiladi. Hujjat rasmiy soliq cheki yoki hisob-faktura emas.</p>
-<div class="actions no-print"><button class="btn" onclick="window.print()">PDF qilib saqlash / chop etish</button>
-<a class="btn alt" href="/orders">Buyurtmalarim</a><a class="btn alt" href="/">Bosh sahifa</a></div>
-</main></body></html>"""
+<div class="sigs">
+<div class="{% if bconf %}ok{% endif %}"><b>Xaridor tasdig'i</b><br>{{ bname }}<br>{% if bconf %}&#10003; Mahsulotni oldi: {{ bconf }}{% else %}kutilmoqda{% endif %}</div>
+<div class="{% if sconf %}ok{% endif %}"><b>Sotuvchi tasdig'i</b><br>{{ sname }}<br>{% if sconf %}&#10003; Mahsulotni topshirdi: {{ sconf }}{% else %}kutilmoqda{% endif %}</div></div>
+{% if status == 'completed' %}<p class="note">Tomonlar savdo amalga oshganini AgriEko tizimida alohida-alohida tasdiqladilar ({{ cdate }}). Ushbu hujjat tomonlarning elektron tasdig'i hisoblanadi.
+U rasmiy soliq cheki, hisob-faktura yoki notarial shartnoma o'rnini bosmaydi. To'lov AgriEko saytida amalga oshirilmagan.</p>
+{% elif status == 'cancelled' %}<p class="note">Buyurtma bekor qilingan ({{ cdate }}).</p>
+{% else %}<p class="note">Savdo ikkala tomon tasdiqlagandan keyin shartnoma bo'lib rasmiylashadi. To'lov va yetkazish shartlari tomonlar o'rtasida kelishiladi.</p>{% endif %}
+<div class="no-print">
+{% if can_confirm %}<p class="warn">Faqat savdo haqiqatan amalga oshgandan keyin tasdiqlang. Tasdiqlashni qaytarib bo'lmaydi.</p>
+<div class="actions"><button class="btn" id="confirmBtn">{{ confirm_label }}</button></div>{% elif waiting %}<p class="warn">Siz tasdiqladingiz. Ikkinchi tomon tasdiqlashini kutyapmiz.</p>{% endif %}
+<div class="actions">{% if can_cancel %}<button class="btn red" id="cancelBtn">Buyurtmani bekor qilish</button>{% endif %}
+<button class="btn" onclick="window.print()">PDF qilib saqlash / chop etish</button>
+<a class="btn alt" href="/orders">Buyurtmalarim</a><a class="btn alt" href="/">Bosh sahifa</a></div></div>
+</main>
+<script>
+async function act(path){const r=await fetch(path,{method:'POST'});const d=await r.json().catch(()=>({}));
+if(!r.ok){alert(d.error||'Xatolik');return;}location.reload();}
+const cb=document.getElementById('confirmBtn');if(cb)cb.onclick=()=>{if(confirm("Savdo haqiqatan amalga oshganini tasdiqlaysizmi? Buni qaytarib bo'lmaydi."))act('/api/orders/{{ oid }}/confirm');};
+const xb=document.getElementById('cancelBtn');if(xb)xb.onclick=()=>{if(confirm("Buyurtmani bekor qilasizmi?"))act('/api/orders/{{ oid }}/cancel');};
+</script></body></html>"""
 
 LIST_HTML = """<!doctype html><html lang="uz"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
 <title>Buyurtmalarim | AgriEko</title><style>""" + SHEET_CSS + """</style></head><body><main class="sheet">
 <div class="top"><div><h1>Buyurtmalarim</h1><div class="muted">Siz xaridor yoki sotuvchi bo'lgan buyurtmalar</div></div></div>
-{% if rows %}<div class="tw"><table><thead><tr><th>Raqam</th><th>Sana</th><th>Kim bilan</th><th class="r">Jami</th><th></th></tr></thead><tbody>
-{% for r in rows %}<tr><td><b>{{ r.number }}</b></td><td>{{ r.date }}</td><td>{{ r.who }}</td><td class="r">{{ r.total }} UZS</td>
+{% if sold or bought %}<div class="sum">
+{% if sold %}<div><b>Sotilgan (yakunlangan)</b><br>{{ sold }}</div>{% endif %}
+{% if bought %}<div><b>Sotib olingan (yakunlangan)</b><br>{{ bought }}</div>{% endif %}</div>{% endif %}
+{% if rows %}<div class="tw"><table><thead><tr><th>Raqam</th><th>Sana</th><th>Kim bilan</th><th>Holat</th><th class="r">Jami</th><th></th></tr></thead><tbody>
+{% for r in rows %}<tr><td><b>{{ r.number }}</b></td><td>{{ r.date }}</td><td>{{ r.who }}</td><td>{{ r.status }}</td><td class="r">{{ r.total }} UZS</td>
 <td class="r"><a href="/order/{{ r.id }}">Ochish</a></td></tr>{% endfor %}</tbody></table></div>
 {% else %}<p class="muted" style="margin-top:20px">Hozircha buyurtma yo'q.</p>{% endif %}
 <div class="actions no-print"><a class="btn alt" href="/">Bosh sahifa</a></div></main></body></html>"""
+
+
+def kg_text(kg):
+    return f"{kg:,.0f} kg ({kg / 1000:,.2f} t)"
 
 
 @app.route("/order/<int:oid>")
@@ -517,14 +646,24 @@ def order_sheet(oid):
         abort(404)
     if u["id"] not in (o["buyer_id"], o["seller_id"]):
         return "Bu varaqa sizga tegishli emas", 403
-    lines = [{"title": l["title"], "qty": f"{l['qty']:g}", "price": money(l["price"]), "sum": money(l["sum"])}
-             for l in json.loads(o["items"])]
+    raw = json.loads(o["items"])
+    lines = [{"title": l["title"], "qty": f"{l['qty']:g}", "price": money(l["price"]), "sum": money(l["sum"])} for l in raw]
+    kg = sum(l["qty"] for l in raw)
+    status = o["status"]
+    is_buyer = u["id"] == o["buyer_id"]
+    mine = o["buyer_confirmed_at"] if is_buyer else o["seller_confirmed_at"]
     return render_template_string(
-        SHEET_HTML, number=order_number(o["id"]), date=str(o["created_at"])[:16],
+        SHEET_HTML, oid=o["id"], number=order_number(o["id"]), date=fmt_dt(o["created_at"]),
+        title="SAVDO SHARTNOMASI (dalolatnoma)" if status == "completed" else "Buyurtma varaqasi",
+        status=status, status_label=STATUS_LABEL.get(status, status),
         bname=o["bname"] or "-", bphone=("+998" + o["bphone"]) if o["bphone"] else "-",
         sname=o["sname"] or "-", sphone=("+998" + o["sphone"]) if o["sphone"] else "-", stg=o["stg"] or "",
-        lines=lines, subtotal=money(o["subtotal"]), lname=LOGISTICS.get(o["logistics_type"], ("-", 0))[0],
-        lcost=money(o["logistics_cost"]), total=money(o["total"]))
+        lines=lines, total_kg=f"{kg:g}", total_t=f"{kg / 1000:,.2f}", subtotal=money(o["subtotal"]),
+        lname=LOGISTICS.get(o["logistics_type"], ("-", 0))[0], lcost=money(o["logistics_cost"]), total=money(o["total"]),
+        bconf=fmt_dt(o["buyer_confirmed_at"]), sconf=fmt_dt(o["seller_confirmed_at"]),
+        cdate=fmt_dt(o["completed_at"] or o["cancelled_at"]),
+        can_confirm=status == "new" and not mine, waiting=status == "new" and bool(mine), can_cancel=status == "new",
+        confirm_label="Mahsulotni oldim, savdoni tasdiqlayman" if is_buyer else "Mahsulotni topshirdim, savdoni tasdiqlayman")
 
 
 @app.route("/orders")
@@ -535,12 +674,97 @@ def my_orders():
     with db() as conn:
         rows = run(conn, """SELECT o.*, b.name AS bname, s.name AS sname FROM orders o
                             LEFT JOIN users b ON b.id = o.buyer_id LEFT JOIN users s ON s.id = o.seller_id
-                            WHERE o.buyer_id=? OR o.seller_id=? ORDER BY o.id DESC LIMIT 100""",
+                            WHERE o.buyer_id=? OR o.seller_id=? ORDER BY o.id DESC LIMIT 200""",
                     (u["id"], u["id"])).fetchall()
-    view = [{"id": r["id"], "number": order_number(r["id"]), "date": str(r["created_at"])[:10],
-             "who": (r["sname"] if r["buyer_id"] == u["id"] else r["bname"]) or "-", "total": money(r["total"])}
-            for r in rows]
-    return render_template_string(LIST_HTML, rows=view)
+    sold_kg = sold_sum = bought_kg = bought_sum = 0
+    view = []
+    for r in rows:
+        if r["status"] == "completed":
+            kg = sum(l["qty"] for l in json.loads(r["items"]))
+            if r["seller_id"] == u["id"]:
+                sold_kg, sold_sum = sold_kg + kg, sold_sum + r["subtotal"]
+            if r["buyer_id"] == u["id"]:
+                bought_kg, bought_sum = bought_kg + kg, bought_sum + r["subtotal"]
+        view.append({"id": r["id"], "number": order_number(r["id"]), "date": fmt_dt(r["created_at"])[:10],
+                     "who": (r["sname"] if r["buyer_id"] == u["id"] else r["bname"]) or "-",
+                     "status": STATUS_LABEL.get(r["status"], r["status"]), "total": money(r["total"])})
+    return render_template_string(
+        LIST_HTML, rows=view,
+        sold=f"{kg_text(sold_kg)}, {money(sold_sum)} UZS" if sold_kg else "",
+        bought=f"{kg_text(bought_kg)}, {money(bought_sum)} UZS" if bought_kg else "")
+
+
+# ---------------------------------------------------------------- Shartlar va maxfiylik
+LEGAL_TOP = """<!doctype html><html lang="uz"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>{{ title }} | AgriEko</title><style>""" + SHEET_CSS + """
+.legal h2{font-size:17px;margin:22px 0 6px;color:#166534}.legal p,.legal li{font-size:14px;color:#334155}.legal ul{padding-left:20px;margin:6px 0}
+</style></head><body><main class="sheet legal">
+<div class="top"><div><h1>AgriEko</h1><div class="muted">{{ title }}</div></div><div class="num"><small>Versiya: {{ version }}</small></div></div>
+"""
+LEGAL_BOTTOM = """{% if contact %}<h2>Aloqa</h2><p>{{ contact }}</p>{% endif %}
+<div class="actions no-print"><a class="btn alt" href="/">Bosh sahifa</a></div></main></body></html>"""
+
+TERMS_BODY = """
+<h2>1. Umumiy qoidalar</h2>
+<p>AgriEko fermerlar (sotuvchilar) va xaridorlarni bir-biri bilan bog'laydigan hamda e'lonlar va buyurtmalarni rasmiylashtirishga yordam beradigan elektron vosita. AgriEko sotuvchi ham, xaridor ham emas, mahsulotga egalik qilmaydi va to'lovlarni qabul qilmaydi. Saytdan foydalanish va hisob ochish bilan siz ushbu shartlarga rozilik bildirasiz.</p>
+<h2>2. Hisob</h2>
+<ul><li>Ro'yxatdan o'tishda to'g'ri ma'lumot kiriting va parolingizni maxfiy saqlang.</li>
+<li>Hisobingiz orqali qilingan harakatlar uchun o'zingiz javobgarsiz.</li>
+<li>Sotuvchi nomi yonidagi "tasdiqlangan" belgisi AgriEko tomonidan sotuvchi ma'lumotlari ko'rib chiqilganini bildiradi. Bu mahsulot sifati, miqdori yoki savdo bajarilishining kafolati emas.</li></ul>
+<h2>3. E'lonlar</h2>
+<ul><li>E'londagi nom, narx, hajm, hudud va boshqa ma'lumotlar haqiqiy bo'lishi shart.</li>
+<li>Soxta e'lon, noqonuniy mahsulot, boshqa shaxs nomidan e'lon berish va aldov taqiqlanadi.</li>
+<li>AgriEko qoidabuzarlikda e'lonni o'chirish yoki hisobni cheklash huquqini saqlab qoladi.</li></ul>
+<h2>4. Buyurtma va savdo</h2>
+<ul><li>Buyurtma xaridorning sotuvchiga yuborgan so'rovi. Narx, to'lov va yetkazish shartlarini tomonlar o'zaro, masalan Telegramda, kelishadi.</li>
+<li>AgriEko to'lovni qabul qilmaydi, pulni o'zida saqlamaydi va to'lov kafolatini bermaydi.</li>
+<li>Savdo amalga oshgach, xaridor va sotuvchi buni saytda alohida tasdiqlaydi. Ikkala tasdiq bo'lgandagina "savdo shartnomasi (dalolatnoma)" hosil bo'ladi. Tasdiqni qaytarib bo'lmaydi, shuning uchun faqat savdo haqiqatan bo'lgandan keyin tasdiqlang.</li>
+<li>Dalolatnoma tomonlarning elektron tasdig'i hisoblanadi. U rasmiy soliq cheki, hisob-faktura yoki notarial shartnoma o'rnini bosmaydi.</li></ul>
+<h2>5. Mas'uliyat</h2>
+<ul><li>Mahsulot sifati, miqdori, to'lov va yetkazib berish uchun savdo tomonlari o'zlari javob beradi.</li>
+<li>Soliq va ro'yxatdan o'tish bo'yicha majburiyatlarni foydalanuvchilar o'zlari bajaradi.</li>
+<li>AgriEko qonunchilikda ruxsat etilgan darajada tomonlar o'rtasidagi savdo va nizolar bo'yicha javobgar bo'lmaydi. Qonunning majburiy talablari bundan mustasno.</li>
+<li>Sayt "mavjud holida" taqdim etiladi, uzilishlar bo'lishi mumkin.</li></ul>
+<h2>6. Nizolar</h2>
+<p>Nizo chiqsa, avval tomonlar o'zaro kelishishga harakat qiladi. Dalolatnoma va buyurtma varaqasi kelishuv dalili sifatida ishlatilishi mumkin. Shikoyat bo'lsa, quyidagi aloqa kanali orqali murojaat qiling.</p>
+<h2>7. O'zgartirishlar</h2>
+<p>Shartlar yangilanishi mumkin. Yangi versiya shu sahifada e'lon qilinadi va sanasi ko'rsatiladi.</p>
+"""
+
+PRIVACY_BODY = """
+<h2>1. Qanday ma'lumotlar yig'iladi</h2>
+<ul><li>Ism yoki xo'jalik nomi, telefon raqami, parol (faqat shifrlangan ko'rinishda saqlanadi).</li>
+<li>Sotuvchilar uchun Telegram username.</li>
+<li>E'lonlar (nom, narx, hajm, hudud, rasm) va buyurtmalar (tarkibi, summasi, tasdiqlar sanasi).</li>
+<li>Tizimda qolish uchun sessiya cookie fayli.</li></ul>
+<h2>2. Nima maqsadda ishlatiladi</h2>
+<p>Hisobni yuritish, e'lon joylashtirish, xaridor va sotuvchini bog'lash, buyurtmalar va dalolatnomalarni rasmiylashtirish, saytning xavfsizligini ta'minlash uchun. Ma'lumotlaringiz reklama maqsadida uchinchi shaxslarga sotilmaydi.</p>
+<h2>3. Kimga ko'rinadi</h2>
+<ul><li>E'londagi sotuvchi nomi, telefoni va Telegram username'i barcha tashrif buyuruvchilarga ochiq ko'rinishi mumkin.</li>
+<li>Buyurtmada xaridor va sotuvchi bir-birining ismi va telefon raqamini ko'radi.</li>
+<li>Qonun talab qilsa, vakolatli organlarga ma'lumot berilishi mumkin.</li></ul>
+<h2>4. Qayerda saqlanadi</h2>
+<p>Ma'lumotlar bulutli xizmatlarda (ma'lumotlar bazasi va hosting) saqlanadi. Bu serverlar O'zbekistondan tashqarida joylashgan bo'lishi mumkin. Ro'yxatdan o'tish bilan siz shunga rozilik bildirasiz.</p>
+<h2>5. Sizning huquqlaringiz</h2>
+<p>Siz o'z ma'lumotlaringizni ko'rishni, to'g'rilashni yoki o'chirishni so'rashingiz mumkin. Buning uchun quyidagi aloqa kanaliga murojaat qiling. Boshqa tomon bilan tuzilgan dalolatnomalar ikkinchi tomon uchun saqlanib qolishi mumkin.</p>
+<h2>6. Xavfsizlik</h2>
+<p>Parollar shifrlangan holda saqlanadi va aloqa himoyalangan kanal orqali o'tadi. Biroq hech bir tizim to'liq xavfsizlikni kafolatlay olmaydi. Parolingizni boshqalarga bermang.</p>
+<h2>7. Rozilik</h2>
+<p>Ro'yxatdan o'tish va tizimga kirishda siz ushbu siyosat va foydalanuvchi shartlariga, shaxsiy ma'lumotlaringizni yuqoridagi maqsadlarda qayta ishlashga rozilik bildirasiz. Rozilik sanasi va shartlar versiyasi hisobingiz bilan birga saqlanadi.</p>
+"""
+
+
+@app.route("/shartlar")
+def legal_terms():
+    return render_template_string(LEGAL_TOP + TERMS_BODY + LEGAL_BOTTOM, title="Foydalanuvchi shartlari",
+                                  version=TERMS_VERSION, contact=CONTACT_INFO)
+
+
+@app.route("/maxfiylik")
+def legal_privacy():
+    return render_template_string(LEGAL_TOP + PRIVACY_BODY + LEGAL_BOTTOM, title="Maxfiylik siyosati",
+                                  version=TERMS_VERSION, contact=CONTACT_INFO)
 
 
 if __name__ == "__main__":
