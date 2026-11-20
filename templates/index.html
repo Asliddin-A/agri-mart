@@ -131,13 +131,13 @@
         <section class="relative rounded-3xl overflow-hidden bg-gradient-to-r from-agri-900 via-agri-800 to-emerald-900 text-white shadow-xl border border-agri-700/40 p-5 sm:p-10">
             <div class="relative z-10 max-w-2xl space-y-4">
                 <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-500/20 text-emerald-300 rounded-full text-xs font-semibold border border-emerald-500/30">
-                    <i class="fa-solid fa-shield-halved text-amber-400"></i> Escrow kafolati va shaffof narx
+                    <i class="fa-solid fa-handshake text-amber-400"></i> Vositachisiz va shaffof narx
                 </span>
                 <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
                     Fermerdan to'g'ridan-to'g'ri xarid qiling: vositachisiz va shaffof
                 </h1>
                 <p class="text-sm text-agri-100 leading-relaxed">
-                    Yirik restoranlar, supermarket tarmoqlari va ulgurji bozorlar uchun kafolatlangan sifat, sovutgichli logistika va xavfsiz to'lov tizimi.
+                    Yirik restoranlar, supermarket tarmoqlari va ulgurji bozorlar uchun fermerlar bilan to'g'ridan-to'g'ri aloqa, shaffof narx va rasmiylashtirilgan buyurtma.
                 </p>
                 <div class="pt-2 flex flex-col sm:flex-row gap-3">
                     <a href="#marketplaceSection" class="px-5 py-3 bg-agri-500 hover:bg-agri-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-agri-500/30 transition flex items-center justify-center gap-2">
@@ -302,6 +302,11 @@
         </section>
     </main>
 
+    <footer class="border-t border-slate-200 bg-white px-4 py-5 text-center text-xs text-slate-500">
+        <p><a href="/shartlar" class="underline hover:text-slate-800">Foydalanuvchi shartlari</a> &middot; <a href="/maxfiylik" class="underline hover:text-slate-800">Maxfiylik siyosati</a></p>
+        <p class="mt-1">AgriEko e'lon joylashtirish va buyurtmalarni rasmiylashtirish vositasi. To'lov saytda amalga oshirilmaydi.</p>
+    </footer>
+
     <!-- MODAL: Kirish / Ro'yxatdan o'tish -->
     <div id="authModal" data-modal class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true" aria-labelledby="authTitle">
         <div tabindex="-1" class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col modal-panel outline-none">
@@ -343,8 +348,12 @@
                     <input id="authTelegram" type="text" autocapitalize="none" placeholder="@ali_fermer" class="w-full px-3.5 py-3 text-base sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-agri-500 focus:outline-none">
                     <p class="text-xs text-slate-500 mt-1">Xaridorlar sizga shu orqali yozadi. Sotuvchi hisobi tekshiruvdan keyin "tasdiqlangan" belgisini oladi.</p>
                 </div>
+                <label class="flex items-start gap-3 rounded-xl bg-slate-50 p-3 text-sm text-slate-600">
+                    <input id="authAgree" type="checkbox" class="mt-0.5 h-5 w-5 shrink-0 accent-green-600">
+                    <span>Men <a href="/shartlar" target="_blank" rel="noopener" class="font-semibold text-agri-700 underline">Foydalanuvchi shartlari</a> va <a href="/maxfiylik" target="_blank" rel="noopener" class="font-semibold text-agri-700 underline">Maxfiylik siyosati</a> bilan tanishdim va ularga roziman, shaxsiy ma'lumotlarim qayta ishlanishiga rozilik beraman.</span>
+                </label>
                 <p id="authError" class="hidden rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700" role="alert"></p>
-                <button id="authSubmit" type="submit" class="w-full py-3.5 bg-agri-600 hover:bg-agri-700 disabled:opacity-60 text-white font-bold text-sm rounded-xl shadow-md transition">Kirish</button>
+                <button id="authSubmit" type="submit" disabled class="w-full py-3.5 bg-agri-600 hover:bg-agri-700 disabled:opacity-60 text-white font-bold text-sm rounded-xl shadow-md transition">Kirish</button>
             </form>
         </div>
     </div>
@@ -393,6 +402,27 @@
                 </div>
 
                 <div id="checkoutLinks" class="space-y-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Buyurtma qabul qilindi -->
+    <div id="orderModal" data-modal class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true" aria-labelledby="orderTitle">
+        <div tabindex="-1" class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl modal-panel overflow-y-auto outline-none p-6 space-y-4">
+            <div class="text-center space-y-1">
+                <div class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-agri-100 text-agri-600"><i class="fa-solid fa-check text-2xl"></i></div>
+                <h2 id="orderTitle" class="text-lg font-bold text-slate-800">Buyurtma qabul qilindi</h2>
+                <p class="text-2xl font-extrabold text-agri-700" id="orderNumber"></p>
+            </div>
+            <div class="rounded-xl bg-slate-50 p-3 text-sm text-slate-700 space-y-1">
+                <div class="flex justify-between gap-3"><span>Sotuvchi</span><b id="orderSeller" class="text-right"></b></div>
+                <div class="flex justify-between gap-3"><span>Jami</span><b id="orderTotal"></b></div>
+            </div>
+            <p class="text-xs text-slate-500">Pul saytda yechilmaydi. To'lov va yetkazish shartlarini fermer bilan Telegramda kelishib oling. Savdo amalga oshgach, ikkala tomon varaqada tasdiqlaydi va shartnoma hosil bo'ladi.</p>
+            <div class="space-y-2">
+                <a id="orderOpenLink" href="#" target="_blank" rel="noopener" class="flex w-full items-center justify-center gap-2 rounded-xl bg-agri-600 py-3.5 text-sm font-bold text-white hover:bg-agri-700"><i class="fa-solid fa-file-pdf"></i> Buyurtma varaqasini ochish</a>
+                <a id="orderTgLink" href="#" target="_blank" rel="noopener" class="hidden flex w-full items-center justify-center gap-2 rounded-xl bg-sky-600 py-3.5 text-sm font-bold text-white hover:bg-sky-700"><i class="fa-brands fa-telegram text-lg"></i> Telegramda fermerga yozish</a>
+                <button id="closeOrderBtn" type="button" class="w-full rounded-xl bg-slate-100 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-200">Yopish</button>
             </div>
         </div>
     </div>
@@ -640,35 +670,64 @@
         }
 
 
-        // ===== Telegram orqali buyurtma =====
-        function renderCheckoutLinks(logistics) {
+        // ===== Buyurtma berish (ro'yxatdan o'tish majburiy) =====
+        let checkoutGroups = new Map();
+        function renderCheckoutLinks() {
             const box = $('checkoutLinks');
-            if (cart.length === 0) { box.innerHTML = ''; return; }
-            const logLabel = $('logisticsTypeSelect').selectedOptions[0].textContent;
-            const groups = new Map();
+            checkoutGroups = new Map();
             cart.forEach(it => {
                 const p = it.product;
-                const key = p.telegram || p.phone || ('x' + p.id);
-                if (!groups.has(key)) groups.set(key, { farmer: p.farmer, telegram: p.telegram, phone: p.phone, items: [] });
-                groups.get(key).items.push(it);
+                const key = String(p.sellerId ?? ('x' + p.id));
+                if (!checkoutGroups.has(key)) checkoutGroups.set(key, { farmer: p.farmer, items: [] });
+                checkoutGroups.get(key).items.push(it);
             });
-            box.innerHTML = [...groups.values()].map(g => {
+            if (cart.length === 0) { box.innerHTML = ''; return; }
+            box.innerHTML = [...checkoutGroups.entries()].map(([key, g]) => {
                 const sum = g.items.reduce((s, i) => s + i.product.price * i.cartQty, 0);
-                const lines = g.items.map(i => `- ${i.product.name}: ${fmt(i.cartQty)} kg x ${fmt(i.product.price)} UZS = ${fmt(i.product.price * i.cartQty)} UZS`).join('\n');
-                const text = `Assalomu alaykum! AgriEko saytidan yozyapman. Buyurtma:\n${lines}\nJami: ${fmt(sum)} UZS\nYetkazish: ${logLabel}\nShartlarni kelishib olsak bo'ladimi?`;
-                const tgUser = String(g.telegram || '').replace(/[^A-Za-z0-9_]/g, '');
-                const digits = String(g.phone || '').replace(/\D/g, '');
-                const href = tgUser ? `https://t.me/${tgUser}?text=${encodeURIComponent(text)}`
-                           : digits ? `https://t.me/+${digits}` : '';
-                return href
-                    ? `<a href="${esc(href)}" target="_blank" rel="noopener" data-order class="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-600 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-sky-700"><i class="fa-brands fa-telegram text-lg"></i> Telegramda yozish: ${esc(g.farmer)}</a>`
-                    : `<p class="rounded-xl bg-slate-100 p-3 text-center text-xs text-slate-500">${esc(g.farmer)}: kontakt ko'rsatilmagan</p>`;
-            }).join('');
+                return `<button type="button" data-checkout="${esc(key)}" class="flex w-full items-center justify-center gap-2 rounded-xl bg-agri-600 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-agri-700 disabled:opacity-60"><i class="fa-solid fa-file-signature"></i> Buyurtma berish: ${esc(g.farmer)} (${fmt(sum)} UZS)</button>`;
+            }).join('') + (me ? '' : '<p class="text-center text-xs text-slate-500">Buyurtma berish uchun ro\'yxatdan o\'tish kerak</p>');
         }
 
-        $('checkoutLinks').addEventListener('click', e => {
-            if (e.target.closest('[data-order]')) { orders.push({ createdAt: Date.now() }); updateStats(); }
+        $('checkoutLinks').addEventListener('click', async e => {
+            const btn = e.target.closest('[data-checkout]');
+            if (!btn) return;
+            if (!me) {
+                closeModal($('cartModal'));
+                openAuth('register');
+                showToast("Buyurtma berish uchun avval ro'yxatdan o'ting", 'info');
+                return;
+            }
+            const g = checkoutGroups.get(btn.dataset.checkout);
+            if (!g) return;
+            btn.disabled = true;
+            try {
+                const d = await postJSON('/api/orders', {
+                    logistics: $('logisticsTypeSelect').value,
+                    items: g.items.map(i => ({ id: i.product.id, qty: i.cartQty }))
+                });
+                cart = cart.filter(i => !g.items.includes(i));
+                orders.push(d.order);
+                updateStats();
+                updateCartUI();
+                showOrderResult(d.order);
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally { btn.disabled = false; }
         });
+
+        function showOrderResult(o) {
+            $('orderNumber').textContent = o.number;
+            $('orderTotal').textContent = fmt(o.total) + ' UZS';
+            $('orderSeller').textContent = o.seller_name;
+            $('orderOpenLink').href = o.url;
+            const text = `Assalomu alaykum! AgriEko saytida ${o.number} raqamli buyurtma berdim.\nJami: ${fmt(o.total)} UZS\nVaraqa: ${location.origin}${o.url}\nShartlarni kelishib olsak bo'ladimi?`;
+            const tg = String(o.seller_telegram || '').replace(/[^A-Za-z0-9_]/g, '');
+            const link = $('orderTgLink');
+            if (tg) { link.href = `https://t.me/${tg}?text=${encodeURIComponent(text)}`; link.classList.remove('hidden'); }
+            else link.classList.add('hidden');
+            closeModal($('cartModal'));
+            openModal($('orderModal'));
+        }
 
         function updateCartUI() {
             const badge = $('cartCountBadge');
@@ -749,6 +808,7 @@
 
         $('openCartBtn').addEventListener('click', () => { updateCartUI(); openModal($('cartModal')); });
         $('closeCartBtn').addEventListener('click', () => closeModal($('cartModal')));
+        $('closeOrderBtn').addEventListener('click', () => closeModal($('orderModal')));
 
         // ===== Filtrlar =====
         ['searchInput'].forEach(id => $(id).addEventListener('input', renderProducts));
@@ -802,6 +862,7 @@
                     image: r.image_url || r.image || '',
                     phone: r.phone_number || '',
                     telegram: r.telegram || '',
+                    sellerId: r.seller_id ?? null,
                     rating: r.rating || null
                 }));
             } catch (err) {
@@ -856,6 +917,7 @@
                     <p class="truncate text-sm font-bold text-slate-800">${esc(me.name)}</p>
                     <p class="text-xs mt-0.5">${status}</p>
                 </div>
+                <a href="/orders" class="${MENU_ITEM}"><i class="fa-solid fa-file-lines w-4 text-agri-600"></i> Buyurtmalarim</a>
                 ${me.role === 'seller' ? `<a href="/elon.html" class="${MENU_ITEM}"><i class="fa-solid fa-plus w-4 text-agri-600"></i> E'lon berish</a>` : ''}
                 <button type="button" data-menu="logout" class="${MENU_ITEM} ${me.role === 'seller' ? 'border-t border-slate-100' : ''}"><i class="fa-solid fa-right-from-bracket w-4 text-slate-400"></i> Chiqish</button>${installItem()}`;
         }
@@ -863,6 +925,7 @@
         async function loadMe() {
             try { me = (await (await fetch('/api/me')).json()).user; } catch (_) { me = null; }
             renderMenu();
+            updateCartUI();
         }
 
         function setAuthMode(mode) {
@@ -878,19 +941,26 @@
                 t.className = 'auth-tab rounded-lg py-2.5 text-sm font-semibold transition ' + (on ? 'bg-white text-agri-800 shadow-sm' : 'text-slate-500 hover:text-slate-800');
             });
             $('authError').classList.add('hidden');
+            $('authSubmit').disabled = !$('authAgree').checked;
         }
         function openAuth(mode) { setAuthMode(mode); openModal($('authModal')); }
 
         document.querySelectorAll('.auth-tab').forEach(t => t.addEventListener('click', () => setAuthMode(t.dataset.tab)));
         $('authRole').addEventListener('change', () => setAuthMode('register'));
+        $('authAgree').addEventListener('change', () => { $('authSubmit').disabled = !$('authAgree').checked; });
         $('closeAuthBtn').addEventListener('click', () => closeModal($('authModal')));
 
         $('authForm').addEventListener('submit', async e => {
             e.preventDefault();
             const btn = $('authSubmit');
+            if (!$('authAgree').checked) {
+                $('authError').textContent = 'Davom etish uchun shartlarga rozilik bering';
+                $('authError').classList.remove('hidden');
+                return;
+            }
             btn.disabled = true;
             $('authError').classList.add('hidden');
-            const body = { phone: $('authPhone').value, password: $('authPassword').value };
+            const body = { phone: $('authPhone').value, password: $('authPassword').value, agree: true };
             if (authMode === 'register') {
                 body.name = $('authName').value;
                 body.role = $('authRole').value;
@@ -900,13 +970,15 @@
                 const d = await postJSON(authMode === 'register' ? '/api/register' : '/api/login', body);
                 me = d.user;
                 renderMenu();
+                updateCartUI();
                 closeModal($('authModal'));
                 $('authForm').reset();
+                $('authSubmit').disabled = true;
                 showToast(authMode === 'register' ? "Ro'yxatdan o'tdingiz" : `Xush kelibsiz, ${me.name}`);
             } catch (err) {
                 $('authError').textContent = err.message;
                 $('authError').classList.remove('hidden');
-            } finally { btn.disabled = false; }
+            } finally { btn.disabled = !$('authAgree').checked; }
         });
 
         // Menyu ochish/yopish
@@ -923,7 +995,7 @@
             toggleMenu(false);
             if (b.dataset.menu === 'logout') {
                 await postJSON('/api/logout').catch(() => {});
-                me = null; renderMenu(); showToast('Tizimdan chiqdingiz', 'info');
+                me = null; renderMenu(); updateCartUI(); showToast('Tizimdan chiqdingiz', 'info');
             } else if (b.dataset.menu === 'install') installApp();
             else openAuth(b.dataset.menu);
         });
