@@ -293,6 +293,7 @@
                                 <th class="py-3 px-3">Zahira</th>
                                 <th class="py-3 px-3">Narxi (1 kg)</th>
                                 <th class="py-3 px-3">Sifat</th>
+                            <th class="py-3 px-3"></th>
                             </tr>
                         </thead>
                         <tbody id="farmerTableBody" class="divide-y divide-slate-100 text-xs font-medium"></tbody>
@@ -578,6 +579,7 @@
                         <i class="fa-regular fa-clock shrink-0"></i><span class="truncate">${esc(item.harvestDate)}</span>
                     </span>
                     <span class="flex items-center gap-2">
+                        ${(me && item.sellerId && me.id === item.sellerId) ? `<button type="button" data-del="${esc(item.id)}" aria-label="E'lonni o'chirish" class="grid h-10 w-10 place-items-center rounded-xl border border-red-200 text-red-600 transition hover:bg-red-50"><i class="fa-solid fa-trash-can"></i></button>` : ''}
                         ${phone ? `<a href="tel:${esc(phone)}" aria-label="Fermerga qo'ng'iroq qilish" class="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-slate-100"><i class="fa-solid fa-phone"></i></a>` : ''}
                         <button type="button" data-add="${esc(item.id)}" class="flex h-10 items-center gap-1.5 rounded-xl border border-agri-200 bg-agri-50 px-4 text-xs font-bold text-agri-700 shadow-sm transition hover:border-agri-600 hover:bg-agri-600 hover:text-white">
                             <i class="fa-solid fa-cart-plus"></i> Buyurtma
@@ -623,6 +625,7 @@
                     <td class="px-3 py-3 font-bold text-slate-700 whitespace-nowrap">${fmt(item.quantity)} kg</td>
                     <td class="px-3 py-3 font-bold text-agri-800 whitespace-nowrap">${fmt(item.price)} UZS</td>
                     <td class="px-3 py-3"><span class="${q.cls} rounded-full px-2 py-0.5 text-[11px] font-bold whitespace-nowrap">${q.label}</span></td>
+                    <td class="px-3 py-3 text-right">${(me && item.sellerId && me.id === item.sellerId) ? `<button type="button" data-del="${esc(item.id)}" aria-label="E'lonni o'chirish" class="grid h-10 w-10 place-items-center rounded-xl border border-red-200 text-red-600 transition hover:bg-red-50"><i class="fa-solid fa-trash-can"></i></button>` : ''}</td>
                 </tr>`;
             }).join('');
             updateStats();
@@ -630,9 +633,31 @@
 
         // Kartochkadagi tugma (event delegation)
         $('productGrid').addEventListener('click', e => {
+            const del = e.target.closest('[data-del]');
+            if (del) { deleteListing(del.dataset.del); return; }
             const btn = e.target.closest('[data-add]');
             if (btn) addToCart(btn.dataset.add);
         });
+        $('farmerTableBody').addEventListener('click', e => {
+            const del = e.target.closest('[data-del]');
+            if (del) deleteListing(del.dataset.del);
+        });
+
+        // E'lonni o'chirish (faqat egasi)
+        async function deleteListing(id) {
+            if (!confirm("E'lonni o'chirasizmi? Buni qaytarib bo'lmaydi.")) return;
+            try {
+                const r = await fetch(`/api/products/${encodeURIComponent(id)}`, { method: 'DELETE' });
+                const d = await r.json().catch(() => ({}));
+                if (!r.ok) throw new Error(d.error || 'Xatolik yuz berdi');
+                products = products.filter(p => String(p.id) !== String(id));
+                cart = cart.filter(c => String(c.product.id) !== String(id));
+                renderProducts();
+                renderFarmerTable();
+                updateCartUI();
+                showToast("E'lon o'chirildi", 'info');
+            } catch (err) { showToast(err.message, 'error'); }
+        }
 
         // ===== Savat =====
         function addToCart(productId) {
@@ -926,6 +951,8 @@
             try { me = (await (await fetch('/api/me')).json()).user; } catch (_) { me = null; }
             renderMenu();
             updateCartUI();
+            renderProducts();
+            renderFarmerTable();
         }
 
         function setAuthMode(mode) {
@@ -971,6 +998,8 @@
                 me = d.user;
                 renderMenu();
                 updateCartUI();
+                renderProducts();
+                renderFarmerTable();
                 closeModal($('authModal'));
                 $('authForm').reset();
                 $('authSubmit').disabled = true;
@@ -995,7 +1024,7 @@
             toggleMenu(false);
             if (b.dataset.menu === 'logout') {
                 await postJSON('/api/logout').catch(() => {});
-                me = null; renderMenu(); updateCartUI(); showToast('Tizimdan chiqdingiz', 'info');
+                me = null; renderMenu(); updateCartUI(); renderProducts(); renderFarmerTable(); showToast('Tizimdan chiqdingiz', 'info');
             } else if (b.dataset.menu === 'install') installApp();
             else openAuth(b.dataset.menu);
         });
