@@ -31,6 +31,10 @@ ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "")
 USE_PG = bool(DATABASE_URL)
 CONTACT_INFO = os.environ.get("CONTACT_INFO", "")   # masalan: @username, +998 90 123 45 67
 TERMS_VERSION = "2026-11-20"
+ESKIZ_EMAIL = os.environ.get("ESKIZ_EMAIL", "")        # Eskiz.uz kabinetidagi email
+ESKIZ_PASSWORD = os.environ.get("ESKIZ_PASSWORD", "")  # Eskiz.uz "API uchun parol" (kabinet paroli emas)
+ESKIZ_FROM = os.environ.get("ESKIZ_FROM", "4546")      # Eskiz tasdiqlagan jo'natuvchi nomi
+SITE_URL = os.environ.get("SITE_URL", "").rstrip("/")  # masalan: https://agri-eko.uz
 DB_PATH = os.environ.get("DB_PATH", "/tmp/database.db")      # faqat DATABASE_URL yo'q bo'lsa (lokal)
 UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER", "/tmp/uploads")  # faqat Supabase Storage yo'q bo'lsa (lokal)
 
@@ -47,7 +51,9 @@ if not _secret:
     print("OGOHLANTIRISH: SECRET_KEY o'rnatilmagan")
 app.secret_key = _secret
 app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax",
-                  SESSION_COOKIE_SECURE=bool(os.environ.get("VERCEL")))
+                  SESSION_COOKIE_SECURE=bool(os.environ.get("VERCEL")),
+                  # Kirgan foydalanuvchi 90 kun tizimda qoladi (brauzer/ilova yopilsa ham)
+                  PERMANENT_SESSION_LIFETIME=timedelta(days=90))
 
 # Google'da chiqmasligi uchun. Sayt tayyor bo'lganda shu bloknigina (3 qator) o'chiring.
 HIDE_FROM_SEARCH = True
@@ -253,6 +259,40 @@ def save_image(data, ext):
         return ""
 
 
+# ---------------------------------------------------------------- SMS (Eskiz.uz)
+_eskiz = {"token": ""}
+
+
+def _eskiz_call(path, data, token=""):
+    req = urllib.request.Request("https://notify.eskiz.uz/api/" + path, data=urlencode(data).encode(), method="POST")
+    if token:
+        req.add_header("Authorization", "Bearer " + token)
+    with urllib.request.urlopen(req, timeout=8) as r:
+        return json.loads(r.read().decode() or "{}")
+
+
+def send_sms(phone9, text):
+    """SMS yuboradi. Xato bo'lsa buyurtmaga halal bermaydi: faqat logga yozadi va False qaytaradi."""
+    if not (ESKIZ_EMAIL and ESKIZ_PASSWORD and phone9):
+        return False
+    payload = {"mobile_phone": "998" + phone9, "message": text, "from": ESKIZ_FROM}
+    try:
+        for attempt in (1, 2):
+            if not _eskiz["token"]:
+                _eskiz["token"] = _eskiz_call("auth/login", {"email": ESKIZ_EMAIL, "password": ESKIZ_PASSWORD})["data"]["token"]
+            try:
+                _eskiz_call("message/sms/send", payload, _eskiz["token"])
+                return True
+            except urllib.error.HTTPError as e:
+                if e.code == 401 and attempt == 1:   # token eskirgan, qayta kiramiz
+                    _eskiz["token"] = ""
+                    continue
+                raise
+    except Exception as e:
+        print("SMS xatosi:", e)
+    return False
+
+
 # ---------------------------------------------------------------- Sahifalar
 def serve(name):
     for folder in (os.path.join(BASE_DIR, "templates"), BASE_DIR):
@@ -308,6 +348,7 @@ def api_register():
                       (name, phone, generate_password_hash(password), role, tg, now_ts(), TERMS_VERSION)).fetchone()["id"]
     except INTEGRITY_ERRORS:
         return err("Bu raqam allaqachon ro'yxatdan o'tgan. Kirishni bosing", 409)
+    session.permanent = True
     session["uid"] = uid
     return jsonify({"user": user_json(current_user())})
 
@@ -322,6 +363,7 @@ def api_login():
             u = run(conn, "SELECT * FROM users WHERE phone=?", (phone,)).fetchone()
     if not u or not check_password_hash(u["password_hash"], d.get("password") or ""):
         return err("Telefon yoki parol noto'g'ri", 401)
+    session.permanent = True
     session["uid"] = u["id"]
     return jsonify({"user": user_json(u)})
 
@@ -475,7 +517,12 @@ def api_order_create():
         oid = run(conn, "INSERT INTO orders (buyer_id, seller_id, items, subtotal, logistics_type, logistics_cost, total) "
                         "VALUES (?,?,?,?,?,?,?) RETURNING id",
                   (u["id"], seller_id, json.dumps(lines, ensure_ascii=False), subtotal, lg, lcost, total)).fetchone()["id"]
-        seller = run(conn, "SELECT name, telegram FROM users WHERE id=?", (seller_id,)).fetchone()
+        seller = run(conn, "SELECT name, telegram, phone FROM users WHERE id=?", (seller_id,)).fetchone()
+    # Sotuvchiga SMS: yangi buyurtma haqida (xato bo'lsa ham buyurtma saqlanadi)
+    if seller:
+        send_sms(seller["phone"],
+                 f"AgriEko: yangi buyurtma {order_number(oid)}. Xaridor: {u['name']}, +998{u['phone']}. "
+                 f"Jami: {money(total)} UZS. Batafsil: {SITE_URL or ''}/orders")
     return jsonify({"order": {
         "id": oid, "number": order_number(oid), "total": total, "url": f"/order/{oid}",
         "seller_name": seller["name"] if seller else "Fermer",
