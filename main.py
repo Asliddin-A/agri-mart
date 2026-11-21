@@ -408,6 +408,22 @@ def api_products():
     } for r in rows])
 
 
+@app.route("/api/products/<int:pid>", methods=["DELETE"])
+def api_product_delete(pid):
+    """E'lonni faqat uning egasi o'chira oladi."""
+    u = current_user()
+    if not u:
+        return err("Avval tizimga kiring", 401)
+    with db() as conn:
+        p = run(conn, "SELECT user_id FROM products WHERE id=?", (pid,)).fetchone()
+        if not p:
+            return err("E'lon topilmadi", 404)
+        if p["user_id"] != u["id"]:
+            return err("Bu e'lon sizniki emas", 403)
+        run(conn, "DELETE FROM products WHERE id=? AND user_id=?", (pid, u["id"]))
+    return jsonify({"ok": True})
+
+
 def bad(msg, code=400):
     return f"Xato: {msg}. Orqaga qaytib tuzating.", code
 
